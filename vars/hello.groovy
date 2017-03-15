@@ -1,5 +1,8 @@
 
 def call(params) {
-    print "PARAMS: ${params}"
+    def values = params.collect { k, v ->
+        "${k} -> ${v}"
+    }
+    print "PARAMS: ${values}"
 }
 
