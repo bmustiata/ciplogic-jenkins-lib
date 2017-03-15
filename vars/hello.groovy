@@ -1,4 +1,5 @@
 
+@NonCPS
 def call(params) {
     def values = params.collect { k, v ->
         "${k} -> ${v}"
