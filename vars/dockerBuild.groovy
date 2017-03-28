@@ -4,6 +4,7 @@
  */
 def call(config) {
   sh """
+    echo ${config.file}
     ls -la
   """
 }
