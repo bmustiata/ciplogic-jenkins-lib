@@ -8,16 +8,14 @@ def call(config) {
     def filename = config?.file ?: "Dockerfile"
     def buildArguments = config?.build_args ?: []
 
-    print buildArguments.class.canonicalName
-
-    buildArguments = buildArguments.collect({it -> "--build-arg='$it'"})
+    def stringArguments = buildArguments.collect({it -> "--build-arg='$it'"})
       .join(" ")
 
-    print buildArguments
+    print stringArguments
 
     def script = """
         cd \$(dirname ${filename})
-        docker build ${buildArguments} -f \$(basename ${filename}) .
+        docker build ${stringArguments} -f \$(basename ${filename}) .
     """
 
     print "Going to run:\n$script"
