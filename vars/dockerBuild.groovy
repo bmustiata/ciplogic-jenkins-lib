@@ -3,6 +3,8 @@
  * and a bunch of tags on the end container.
  */
 def call(config) {
+    print config
+
     def filename = config?.file ?: "Dockerfile"
     def buildArguments = config?.build_args ?: []
 
