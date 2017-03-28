@@ -8,7 +8,7 @@ def call(config) {
     def filename = config?.file ?: "Dockerfile"
     def buildArguments = config?.build_args ?: []
 
-    def stringArguments = buildArguments.collect({it -> "--build-arg='$it'"})
+    def stringArguments = buildArguments.collect({"--build-arg='$it'"})
       .join(" ")
 
     print stringArguments
