@@ -10,7 +10,7 @@ def call(config) {
 
     def stringArguments = ''
     buildArguments.each({
-        stringArguments += "--build-arg='" + it + "' "
+        stringArguments = stringArguments + "--build-arg='" + it + "' "
     })
     print stringArguments
 
