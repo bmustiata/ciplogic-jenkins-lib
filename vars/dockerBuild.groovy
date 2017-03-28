@@ -9,10 +9,9 @@ def call(config) {
     def buildArguments = config?.build_args ?: []
 
     def stringArguments = ''
-    buildArguments.each({
-        stringArguments = stringArguments + "--build-arg='" + it + "' "
-    })
-    print stringArguments
+    for (int i = 0; i < buildArguments.size(); i++) {
+        stringArguments += "--build-arg='" + buildArguments.get(i) + "' "
+    }
 
     def script = """
         cd \$(dirname ${filename})
