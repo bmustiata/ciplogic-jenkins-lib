@@ -13,6 +13,8 @@ def call(config) {
     buildArguments = buildArguments.collect({it -> "--build-arg='$it'"})
       .join(" ")
 
+    print buildArguments
+
     def script = """
         cd \$(dirname ${filename})
         docker build ${buildArguments} -f \$(basename ${filename}) .
