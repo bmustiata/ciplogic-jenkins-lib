@@ -3,15 +3,19 @@
  * and a bunch of tags on the end container.
  */
 def call(config) {
-    def filename = config?.file
+    def filename = config?.file ?: "Dockerfile"
+    def buildArguments = config?.build_args ?: []
 
-    if (!filename) {
-        filename = "Dockerfile"
-    }
+    buildArguments = buildArguments.collect({it -> "--build-arg='$it'"})
+      .join(" ")
 
-    sh """
+    def script = """
         cd \$(dirname ${filename})
-        docker build -f \$(basename ${filename}) .
+        docker build ${buildArguments} -f \$(basename ${filename}) .
     """
+
+    print "Going to run:\n$script"
+
+    sh script
 }
 
