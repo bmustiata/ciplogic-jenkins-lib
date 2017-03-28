@@ -3,14 +3,14 @@
  * and a bunch of tags on the end container.
  */
 def call(config) {
-    def fileName = config?.file
+    def filename = config?.file
 
-    if (!fileName) {
+    if (!filename) {
         filename = "Dockerfile"
     }
 
     sh """
-        docker build -f \$(basename ${filename}) $(dirname ${filename})
+        docker build -f \$(basename ${filename}) \$(dirname ${filename})
     """
 }
 
