@@ -10,7 +10,7 @@ def call(config) {
     }
 
     sh """
-        docker build -f $(basename ${filename}) $(dirname ${filename})
+        docker build -f \$(basename ${filename}) $(dirname ${filename})
     """
 }
 
