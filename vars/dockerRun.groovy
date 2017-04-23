@@ -6,6 +6,7 @@ def call(config) {
     def links = config?.links ?: []
     def ports = config?.ports ?: []
     def volumes = config?.volumes ?: []
+    def keep = config?.keep ?: false
 
     if (!image) {
         print "You need to specify what image to run, with image:..."
@@ -32,8 +33,13 @@ def call(config) {
         stringVolumes += "-v '" + volumes.get(i) + "' "
     }
 
+    def removeImages = '--rm '
+    if (keep) {
+        removeImages = ''
+    }
+
     def script = """
-        docker run ${stringEnv}${stringLinks}${stringPorts}${stringVolumes}${image} ${command}
+        docker run ${removeImages}${stringEnv}${stringLinks}${stringPorts}${stringVolumes}${image} ${command}
     """
 
     print "Going to run:\n$script"
