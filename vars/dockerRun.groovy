@@ -1,16 +1,22 @@
 def call(config) {
     def image = config?.image
-    def command = config?.command ?: ""
+    def command = config?.command ?: ''
 
     def env = config?.env ?: []
     def links = config?.links ?: []
     def ports = config?.ports ?: []
     def volumes = config?.volumes ?: []
     def remove = config?.remove ?: false
+    def name = config?.name ?: ''
 
     if (!image) {
-        print "You need to specify what image to run, with image:..."
-        throw new IllegalArgumentException("Missing `image` name")
+        print 'You need to specify what image to run, with image:...'
+        throw new IllegalArgumentException('Missing `image` name')
+    }
+
+    def containerName = ''
+    if (name) {
+        containerName = "--name '${name}' "
     }
 
     def stringEnv = ''
@@ -39,7 +45,7 @@ def call(config) {
     }
 
     def script = """
-        docker run ${removeImages}${stringEnv}${stringLinks}${stringPorts}${stringVolumes}${image} ${command}
+        docker run ${containerName}${removeImages}${stringEnv}${stringLinks}${stringPorts}${stringVolumes}${image} ${command}
     """
 
     print "Going to run:\n$script"
