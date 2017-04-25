@@ -8,6 +8,7 @@ def call(config) {
     def volumes = config?.volumes ?: []
     def remove = config?.remove ?: false
     def name = config?.name ?: ''
+    def privileged = config?.privileged ?: false
 
     if (!image) {
         print 'You need to specify what image to run, with image:...'
@@ -44,8 +45,13 @@ def call(config) {
         removeImages = '--rm '
     }
 
+    def stringPrivileged = ''
+    if (privileged) {
+        stringPrivileged='--privileged '
+    }
+
     def script = """
-        docker run ${containerName}${removeImages}${stringEnv}${stringLinks}${stringPorts}${stringVolumes}${image} ${command}
+        docker run ${containerName}${stringPrivileged}${removeImages}${stringEnv}${stringLinks}${stringPorts}${stringVolumes}${image} ${command}
     """
 
     print "Going to run:\n$script"
