@@ -9,6 +9,7 @@ def call(config) {
     def remove = config?.remove ?: false
     def name = config?.name ?: ''
     def privileged = config?.privileged ?: false
+    def network = config?.network ?: null
 
     if (!image) {
         print 'You need to specify what image to run, with image:...'
@@ -18,6 +19,11 @@ def call(config) {
     def containerName = ''
     if (name) {
         containerName = "--name '${name}' "
+    }
+
+    def stringNetwork = ''
+    if (network) {
+        stringNetwork = "--network ${network} "
     }
 
     def stringEnv = ''
@@ -51,7 +57,7 @@ def call(config) {
     }
 
     def script = """
-        docker run ${containerName}${stringPrivileged}${removeImages}${stringEnv}${stringLinks}${stringPorts}${stringVolumes}${image} ${command}
+        docker run ${containerName}${stringPrivileged}${stringNetwork}${removeImages}${stringEnv}${stringLinks}${stringPorts}${stringVolumes}${image} ${command}
     """
 
     print "Going to run:\n$script"
