@@ -6,11 +6,17 @@ def call(config) {
     def filename = config?.file ?: "Dockerfile"
     def buildArguments = config?.build_args ?: []
     def tags = config?.tags ?: []
-    def network = config?.network ?: null
+    def networks = config?.networks ?: null
+    def noCache = config?.no_cache ?: false
 
     def stringNetwork = ''
-    if (network) {
-        stringNetwork = "--network ${network} "
+    for (String network: networks) {
+        stringNetwork += "--network ${network} "
+    }
+
+    def stringNoCache = ''
+    if (noCache) {
+        stringNoCache += "--no-cache "
     }
 
     def stringArguments = ''
