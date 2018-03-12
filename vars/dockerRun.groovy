@@ -9,7 +9,7 @@ def call(config) {
     def remove = config?.remove ?: false
     def name = config?.name ?: ''
     def privileged = config?.privileged ?: false
-    def network = config?.network ?: null
+    def networks = config?.networks ?: []
 
     if (!image) {
         print 'You need to specify what image to run, with image:...'
@@ -22,7 +22,7 @@ def call(config) {
     }
 
     def stringNetwork = ''
-    if (network) {
+    for (String network: networks) {
         stringNetwork = "--network ${network} "
     }
 
