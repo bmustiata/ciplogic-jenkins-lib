@@ -57,7 +57,7 @@ def call(config) {
     }
 
     def script = """
-        docker run ${containerName}${stringPrivileged}${stringNetwork}${removeImages}${stringEnv}${stringLinks}${stringPorts}${stringVolumes}${image} ${command}
+        docker run -t ${containerName}${stringPrivileged}${stringNetwork}${removeImages}${stringEnv}${stringLinks}${stringPorts}${stringVolumes}${image} ${command}
     """
 
     print "Going to run:\n$script"
