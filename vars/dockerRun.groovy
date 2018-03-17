@@ -28,7 +28,7 @@ def call(config) {
 
     def stringEnv = ''
     for (int i = 0; i < env.size(); i++) {
-        stringEnv += "-e '" + env.get(i) + "' "
+        stringEnv += "-e " + env.get(i) + " "
     }
 
     def stringLinks = ''
