@@ -12,6 +12,8 @@ def call(config) {
     def networks = config?.networks ?: []
     def daemon = config?.daemon ?: false
 
+    def code = config.code
+
     if (!image) {
         print 'You need to specify what image to run, with image:...'
         throw new IllegalArgumentException('Missing `image` name')
@@ -62,12 +64,9 @@ def call(config) {
         stringPrivileged='--privileged '
     }
 
-    def script = """
-        docker run -t ${stringDaemon}${containerName}${stringPrivileged}${stringNetwork}${removeImages}${stringEnv}${stringLinks}${stringPorts}${stringVolumes}${image} ${command}
-    """
-
-    print "Going to run:\n$script"
-
-    sh script
+    docker.image(image)
+        .inside("-t ${stringDaemon}${containerName}${stringPrivileged}${stringNetwork}${removeImages}${stringEnv}${stringLinks}${stringPorts}${stringVolumes}", command) {
+            code()
+    }
 }
 

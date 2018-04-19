@@ -25,6 +25,6 @@ def call(config) {
         """.stripIndent())
     }
 
-    return process.inputStream.text.substring(0, config)
+    return process.inputStream.text.substring(0, count)
 }
 
