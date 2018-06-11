@@ -10,8 +10,6 @@ def call(config) {
     def builder = new ProcessBuilder('git', 'rev-parse', 'HEAD')
         .directory(new File(pwd()))
 
-    builder.environment().putAll(env)
-
     def process = builder.start()
     def exitCode = process.waitFor();
 
