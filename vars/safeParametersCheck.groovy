@@ -3,19 +3,15 @@ def call(storage, self) {
     print(self)
 
     safeParameters.each {
-        print("symbol: ${it.symbol}")
-        if (!self.hasProperty(it.arguments.name)) {
-            print("using default var")
-            self.setProperty(it.arguments.name, it.arguments.defaultValue)
-            return
-        }
-
         // convert the booleans correctly
-        def value = self.getProperty(it.arguments.name)
+        try {
+            def value = self.evaluate(it.arguments.name)
 
-
-        if (it.symbol == 'boolean' && !(value instanceof Boolean)) {
-            self.setProperty(it.arguments.name, Boolean.valueOf(value))
+            if (it.symbol == 'booleanParam' && !(value instanceof Boolean)) {
+                self.binding.setVariable(it.arguments.name, Boolean.valueOf(value))
+            }
+        } catch (Exception e) {
+            self.binding.setVariable(it.arguments.name, it.arguments.defaultValue)
         }
     }
 }
