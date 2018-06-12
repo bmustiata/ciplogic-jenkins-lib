@@ -1,6 +1,5 @@
-def call(storage, self) {
-    def safeParameters = storage.get("__safeParameters")
-    print(self)
+def call(self) {
+    def safeParameters = self.binding.getVariable("__safeParameters")
 
     safeParameters.each {
         // convert the booleans correctly
