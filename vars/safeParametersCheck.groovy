@@ -1,20 +1,21 @@
-def call(storage, binding) {
+def call(storage, self) {
     def safeParameters = storage.get("__safeParameters")
+    print(self)
 
     safeParameters.each {
-        if (!binding.hasVariable(it.arguments.name)) {
+        print("symbol: ${it.symbol}")
+        if (!self.hasVariable(it.arguments.name)) {
             print("using default var")
-            binding.setVariable(it.arguments.name, it.arguments.defaultValue)
+            self.setVariable(it.arguments.name, it.arguments.defaultValue)
             return
         }
 
         // convert the booleans correctly
-        def value = binding.getVariable(it.arguments.name)
+        def value = self.getVariable(it.arguments.name)
 
-        print("symbol: ${it.symbol}")
 
         if (it.symbol == 'boolean' && !(value instanceof Boolean)) {
-            binding.setVariable(it.arguments.name, Boolean.valueOf(value))
+            self.setVariable(it.arguments.name, Boolean.valueOf(value))
         }
     }
 }
