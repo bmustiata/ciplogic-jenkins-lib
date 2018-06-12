@@ -1,7 +1,9 @@
 def call(binding) {
     def safeParameters = binding.getVariable("__safeParameters")
 
-    print(binding)
+binding.properties.each {
+  print it
+}
 
     safeParameters.each {
         if (!binding.hasVariable(it.arguments.name)) {
