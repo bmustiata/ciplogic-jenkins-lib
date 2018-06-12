@@ -1,9 +1,10 @@
 def call(binding) {
     def safeParameters = binding.getVariable("__safeParameters")
-    safeParameters.each {
-        print it.symbol + " -> " + it.klass + " : " + it.arguments + " m: " + it.model
-    }
 
-    throw new IllegalArgumentException("potato")
+    safeParameters.each {
+        if (!binding.hasVariable(it.arguments.name)) {
+            binding.setVariable(it.arguments.name, it.arguments.defaultValue)
+        }
+    }
 }
 
