@@ -1,5 +1,5 @@
 def call(binding, parameterList) {
-    binding["__safeParameters"] == parameterList
+    binding.setVariable("__safeParameters", parameterList)
 
     return parameters(parameterList)
 }
