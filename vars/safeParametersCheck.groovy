@@ -1,7 +1,7 @@
 def call(binding) {
     def safeParameters = binding.getVariable("__safeParameters")
     safeParameters.each {
-        print it.name + " -> " + it.defaultValue + " : " + it
+        print it.symbol + " -> " + it.klass + " : " + it.arguments + " m: " + it.model
     }
 
     throw new IllegalArgumentException("potato")
