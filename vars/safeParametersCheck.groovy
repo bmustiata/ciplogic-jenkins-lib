@@ -1,3 +1,4 @@
 def call(config) {
-    print("Parameters: " +  __safeParameters)
+    print("Config: " +  config)
+    print("Parameters: " +  binding["__safeParameters"])
 }
