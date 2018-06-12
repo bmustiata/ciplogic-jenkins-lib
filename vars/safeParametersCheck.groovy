@@ -1,12 +1,7 @@
-def call(binding) {
-    def safeParameters = binding.getVariable("__safeParameters")
-
-    binding.properties.each {
-        print it
-    }
+def call(storage, binding) {
+    def safeParameters = storage.get("__safeParameters")
 
     safeParameters.each {
-        binding[it.arguments.name]
         if (!binding.hasVariable(it.arguments.name)) {
             print("using default var")
             binding.setVariable(it.arguments.name, it.arguments.defaultValue)

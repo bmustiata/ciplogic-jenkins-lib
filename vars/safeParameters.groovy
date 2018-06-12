@@ -1,5 +1,5 @@
-def call(binding, parameterList) {
-    binding.setVariable("__safeParameters", parameterList)
+def call(storage, parameterList) {
+    storage.put("__safeParameters", parameterList)
 
     return parameters(parameterList)
 }
