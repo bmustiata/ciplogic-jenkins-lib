@@ -2,7 +2,7 @@
  * Get a random GUID
  * @return String
  */
-def call() {
-    return UUID.randomUUID().toString()
+def call(prefix = "") {
+    return prefix + UUID.randomUUID().toString()
 }
 
