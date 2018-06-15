@@ -1,4 +1,3 @@
-
 /**
  * Get the first characters from the git hash, to be used
  * in having some unique identifier that can be tracked back
