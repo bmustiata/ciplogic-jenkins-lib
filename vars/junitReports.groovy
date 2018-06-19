@@ -16,7 +16,7 @@ def call(reportsFolder, code) {
     } finally {
         echo "Running JUnit archival"
         sh "mv '${reportsFolder}' '${currentFolder}/${reportsLocation}'"
-        junit "${currentFolder}/${reportsLocation}/*.xml"
+        junit "${reportsLocation}/*.xml"
         sh "rm -fr ./${reportsLocation}"
     }
 }
