@@ -30,6 +30,6 @@ def call(config) {
         """.stripIndent())
     }
 
-    return process.inputStream.text.substring(0, count)
+    return process.inputStream.text
 }
 
