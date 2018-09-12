@@ -30,8 +30,7 @@ def call(config) {
     }
 
     def script = """
-        cd \$(dirname ${filename})
-        docker build ${stringNetwork}${stringArguments}${stringTags}-f \$(basename ${filename}) .
+        docker build ${stringNetwork}${stringArguments}${stringTags}-f ${filename} .
     """
 
     print "Going to run:\n$script"
