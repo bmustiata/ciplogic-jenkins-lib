@@ -14,7 +14,7 @@ def call(config) {
         }
     }
 
-    def runParallelBuilds = { imageMap, code ->
+    def runParallelTasks = { imageMap, code ->
         def parallelJobs = [:]
 
         imageMap.entrySet().each({e ->
@@ -30,11 +30,11 @@ def call(config) {
     }
 
     stage('Create Base/Run Containers') {
-        runParallelBuilds(config.baseImages, runDockerBuild)
+        runParallelTasks(config.baseImages, runDockerBuild)
     }
 
     stage('Create Build Containers') {
-        runParallelBuilds(config.runImages, runDockerBuild)
+        runParallelTasks(config.runImages, runDockerBuild)
     }
 
     stage('Push docker containers') {
@@ -42,6 +42,6 @@ def call(config) {
         allImages.putAll(config.baseImages)
         allImages.putAll(config.runImages)
 
-        runParallelBuilds(allImages, runDockerPush)
+        runParallelTasks(allImages, runDockerPush)
     }
 }
