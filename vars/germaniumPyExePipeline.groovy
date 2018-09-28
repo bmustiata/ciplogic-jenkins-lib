@@ -46,6 +46,11 @@ def call(config) {
                     node {
                         docker.image(platformConfig.dockerTag)
                               .inside {
+                            sh """
+                                pwd
+                                ls -la
+                            """
+
                             archiveArtifacts(
                                 artifacts: platformConfig.exe,
                                 fingerprint: true
