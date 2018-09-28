@@ -1,6 +1,6 @@
 def call(config) {
     properties([
-        safeParameters(config.that, [
+        safeParameters(this, [
             booleanParam(name: 'RUN_MYPY_CHECKS', defaultValue: true,
                     description: 'Run the mypy type checks.'),
             booleanParam(name: 'RUN_FLAKE8_CHECKS', defaultValue: true,
@@ -8,7 +8,7 @@ def call(config) {
         ])
     ])
 
-    safeParametersCheck(config.that)
+    safeParametersCheck(this)
 
     stage('Type Check') {
         if (!RUN_MYPY_CHECKS && !RUN_FLAKE8_CHECKS) {
