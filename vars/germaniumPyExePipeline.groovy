@@ -1,9 +1,12 @@
 def call(config) {
+    def runMyPyChecks = config.containsKey("runMyPy") ? config.runMyMy : true
+    def runFlake8Checks = config.containsKey("runFlake8") ? config.runFlake8 : true
+
     properties([
         safeParameters(this, [
-            booleanParam(name: 'RUN_MYPY_CHECKS', defaultValue: true,
+            booleanParam(name: 'RUN_MYPY_CHECKS', defaultValue: runMyPyChecks,
                     description: 'Run the mypy type checks.'),
-            booleanParam(name: 'RUN_FLAKE8_CHECKS', defaultValue: true,
+            booleanParam(name: 'RUN_FLAKE8_CHECKS', defaultValue: runFlake8Checks,
                     description: 'Run the flake8 linting.')
         ])
     ])
@@ -22,17 +25,26 @@ def call(config) {
             docker.build("mypy_${env.BUILD_ID}",
                          '-f Dockerfile.py.build .')
                   .inside("-v ${pwd()}:/src") {
+
+                def parallelChecks = [:]
+
                 if (RUN_MYPY_CHECKS) {
-                    sh """
-                        mypy .
-                    """
+                    parallelChecks."mypy" = {
+                        sh """
+                            mypy .
+                        """
+                    }
                 }
 
                 if (RUN_FLAKE8_CHECKS) {
-                    sh """
-                        flake8 .
-                    """
+                    parallelChecks."flake8" = {
+                        sh """
+                            flake8 .
+                        """
+                    }
                 }
+
+                parallel(parallelChecks)
             }
         }
     }
@@ -67,15 +79,12 @@ def call(config) {
                     node {
                         docker.image(platformConfig.dockerTag)
                               .inside {
-                            sh """
-                                pwd
-                                ls -la
-                            """
-
-                            archiveArtifacts(
-                                artifacts: platformConfig.exe,
-                                fingerprint: true
-                            )
+                            dir("/") {
+                                archiveArtifacts(
+                                    artifacts: platformConfig.exe,
+                                    fingerprint: true
+                                )
+                            }
                         }
                     }
                 }
