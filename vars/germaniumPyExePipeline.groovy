@@ -87,8 +87,16 @@ def call(config) {
                 parallelArchiving[platformName] = {
                     node {
                         docker.image(platformConfig.dockerTag).inside {
+                            def exeName = platformConfig.exe.replaceAll("^.*/", "")
+
+                            // W/A for archiveArtifacts that can't copy outside workspace even
+                            // in docker containers.
+                            sh """
+                                cp '${platformConfig.exe}' '${pwd()}/${exeName}'
+                            """
+
                             archiveArtifacts(
-                                artifacts: platformConfig.exe.substring(1),
+                                artifacts: exeName,
                                 fingerprint: true
                             )
                         }
