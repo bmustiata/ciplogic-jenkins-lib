@@ -87,13 +87,11 @@ def call(config) {
                 parallelArchiving[platformName] = {
                     node {
                         docker.image(platformConfig.dockerTag)
-                              .inside {
-                            dir("/") {
-                                archiveArtifacts(
-                                    artifacts: platformConfig.exe.substring(1),
-                                    fingerprint: true
-                                )
-                            }
+                              .inside("-w /") {
+                            archiveArtifacts(
+                                artifacts: platformConfig.exe.substring(1),
+                                fingerprint: true
+                            )
                         }
                     }
                 }
