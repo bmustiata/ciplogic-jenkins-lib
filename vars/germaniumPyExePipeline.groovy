@@ -13,6 +13,9 @@ def call(config) {
 
     safeParametersCheck(this)
 
+    // -------------------------------------------------------------------
+    // Static type checking for the project.
+    // -------------------------------------------------------------------
     stage('Type Check') {
         if (!RUN_MYPY_CHECKS && !RUN_FLAKE8_CHECKS) {
             return;
@@ -49,6 +52,9 @@ def call(config) {
         }
     }
 
+    // -------------------------------------------------------------------
+    // Creation of the actual binaries per each platform, using GBS.
+    // -------------------------------------------------------------------
     stage('Build') {
         def parallelBuilds = [:]
 
@@ -70,6 +76,9 @@ def call(config) {
         parallel(parallelBuilds)
     }
 
+    // -------------------------------------------------------------------
+    // Archival of the binaries.
+    // -------------------------------------------------------------------
     stage('Archive') {
         node {
             def parallelArchiving = [:]
@@ -81,7 +90,7 @@ def call(config) {
                               .inside {
                             dir("/") {
                                 archiveArtifacts(
-                                    artifacts: platformConfig.exe,
+                                    artifacts: platformConfig.exe.substring(1),
                                     fingerprint: true
                                 )
                             }
