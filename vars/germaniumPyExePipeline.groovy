@@ -86,7 +86,7 @@ def call(config) {
             config.binaries.each { platformName, platformConfig ->
                 parallelArchiving[platformName] = {
                     node {
-                        docker.image(platformConfig.dockerTag) {
+                        docker.image(platformConfig.dockerTag).inside {
                             archiveArtifacts(
                                 artifacts: platformConfig.exe.substring(1),
                                 fingerprint: true
