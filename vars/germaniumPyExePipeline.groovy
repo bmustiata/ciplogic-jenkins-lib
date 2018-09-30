@@ -33,7 +33,10 @@ def call(config) {
 
                 if (RUN_MYPY_CHECKS) {
                     parallelChecks."mypy" = {
+                        // We need to run it in the /src folder to pick the setup.cfg if present.
                         sh """
+                            cd /src
+                            export MYPYPATH=/src/stubs
                             mypy .
                         """
                     }
@@ -41,7 +44,9 @@ def call(config) {
 
                 if (RUN_FLAKE8_CHECKS) {
                     parallelChecks."flake8" = {
+                        // We need to run it in the /src folder to pick the setup.cfg if present.
                         sh """
+                            cd /src
                             flake8 .
                         """
                     }
