@@ -92,26 +92,59 @@ def call(config) {
 
             config.binaries.each { platformName, platformConfig ->
                 parallelArchiving[platformName] = {
-                    node {
-                        docker.image(platformConfig.dockerTag).inside {
-                            def exeName = platformConfig.exe.replaceAll("^.*/", "")
+                    docker.image(platformConfig.dockerTag).inside {
+                        def exeName = platformConfig.exe.replaceAll("^.*/", "")
 
-                            // W/A for archiveArtifacts that can't copy outside workspace even
-                            // in docker containers.
-                            sh """
-                                cp '${platformConfig.exe}' '${pwd()}/${exeName}'
-                            """
+                        // W/A for archiveArtifacts that can't copy outside workspace even
+                        // in docker containers.
+                        sh """
+                            cp '${platformConfig.exe}' '${pwd()}/${exeName}'
+                        """
 
-                            archiveArtifacts(
-                                artifacts: exeName,
-                                fingerprint: true
-                            )
-                        }
+                        archiveArtifacts(
+                            artifacts: exeName,
+                            fingerprint: true
+                        )
                     }
                 }
             }
 
             parallel(parallelArchiving)
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // Docker publish
+    // -------------------------------------------------------------------
+    stage('Publish Docker') {
+        node {
+            def parallelPublish = [:]
+
+            config.binaries.each { platformName, platformConfig ->
+                def dockerPublish = platformConfig.dockerPublish ?: false
+                def dockerToolContainer = platformConfig.dockerToolContainer ?: false
+
+                if (!dockerPublish && !dockerToolContainer) {
+                    return
+                }
+
+                parallelPublish[platformName] = {
+                    if (dockerToolContainer) {
+                        echo "Create local container: ${platformConfig.dockerTag}"
+                        dockerRm containers: [platformConfig.dockerTag]
+                        dockerRun image: platformConfig.dockerTag,
+                            name: platformConfig.dockerTag
+                            command: "ls"
+                    }
+
+                    if (dockerPublish) {
+                        echo "Publish docker container: ${platformConfig.dockerTag}"
+                        dpush platformConfig.dockerTag
+                    }
+                }
+            }
+
+            parallel(parallelPublish)
         }
     }
 }
