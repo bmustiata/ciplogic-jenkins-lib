@@ -114,6 +114,32 @@ def call(config) {
     }
 
     // -------------------------------------------------------------------
+    // Create local tool containers
+    // -------------------------------------------------------------------
+    stage('Local Docker Container') {
+        node {
+            def parallelPublish = [:]
+
+            config.binaries.each { platformName, platformConfig ->
+                def dockerToolContainer = platformConfig.dockerToolContainer ?: false
+
+                if (!dockerToolContainer) {
+                    return
+                }
+
+                parallelPublish[platformName] = {
+                    dockerRm containers: [platformConfig.dockerTag]
+                    dockerRun image: platformConfig.dockerTag,
+                        name: platformConfig.dockerTag,
+                        command: "ls"
+                }
+            }
+
+            parallel(parallelPublish)
+        }
+    }
+
+    // -------------------------------------------------------------------
     // Docker publish
     // -------------------------------------------------------------------
     stage('Publish Docker') {
@@ -122,25 +148,13 @@ def call(config) {
 
             config.binaries.each { platformName, platformConfig ->
                 def dockerPublish = platformConfig.dockerPublish ?: false
-                def dockerToolContainer = platformConfig.dockerToolContainer ?: false
 
-                if (!dockerPublish && !dockerToolContainer) {
+                if (!dockerPublish) {
                     return
                 }
 
                 parallelPublish[platformName] = {
-                    if (dockerToolContainer) {
-                        echo "Create local container: ${platformConfig.dockerTag}"
-                        dockerRm containers: [platformConfig.dockerTag]
-                        dockerRun image: platformConfig.dockerTag,
-                            name: platformConfig.dockerTag
-                            command: "ls"
-                    }
-
-                    if (dockerPublish) {
-                        echo "Publish docker container: ${platformConfig.dockerTag}"
-                        dpush platformConfig.dockerTag
-                    }
+                    dpush platformConfig.dockerTag
                 }
             }
 
