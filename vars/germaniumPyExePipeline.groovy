@@ -72,8 +72,8 @@ def call(config) {
                     checkout scm
 
                     dockerBuild(
-                        file: ".${platformConfig.gbs}Dockerfile",
-                        build_args: ["GBS_PREFIX=${platformConfig.gbs}"],
+                        file: ".${gbsPath}Dockerfile",
+                        build_args: ["GBS_PREFIX=${gbsPath}"],
                         tags: [platformConfig.dockerTag]
                     )
                 }
