@@ -64,6 +64,8 @@ def call(config) {
         def parallelBuilds = [:]
 
         config.binaries.each { platformName, platformConfig ->
+            def gbsPath = platformConfig.gbs ?: "/"
+
             parallelBuilds[platformName] = {
                 node {
                     deleteDir()
