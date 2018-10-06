@@ -71,6 +71,10 @@ def call(config) {
                     deleteDir()
                     checkout scm
 
+                    if (platformConfig.extraSteps) {
+                        platformConfig.extraSteps()
+                    }
+
                     dockerBuild(
                         file: ".${gbsPath}Dockerfile",
                         build_args: ["GBS_PREFIX=${gbsPath}"],
