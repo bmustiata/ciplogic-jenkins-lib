@@ -120,7 +120,7 @@ def call(config) {
     // -------------------------------------------------------------------
     // Create local tool containers
     // -------------------------------------------------------------------
-    if (config.binaries.find({platform, config -> config.dockerToolContainer}) {
+    if (config.binaries.find({platformName, platformConfig -> platformConfig.dockerToolContainer})) {
         stage('Local Docker Container') {
             node {
                 def parallelPublish = [:]
@@ -148,7 +148,7 @@ def call(config) {
     // -------------------------------------------------------------------
     // Docker publish
     // -------------------------------------------------------------------
-    if (config.binaries.find({platform, config -> config.dockerPublish}) {
+    if (config.binaries.find({platformName, platforConfig -> platforConfig.dockerPublish})) {
         stage('Publish Docker') {
             node {
                 def parallelPublish = [:]
