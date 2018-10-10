@@ -102,11 +102,12 @@ def call(config) {
                         // W/A for archiveArtifacts that can't copy outside workspace even
                         // in docker containers.
                         sh """
-                            cp '${platformConfig.exe}' '${pwd()}/${exeName}'
+                            mkdir -p '${pwd()}/_archive'
+                            cp '${platformConfig.exe}' '${pwd()}/_archive/${exeName}'
                         """
 
                         archiveArtifacts(
-                            artifacts: exeName,
+                            artifacts: "_archive/${exeName}",
                             fingerprint: true
                         )
                     }
