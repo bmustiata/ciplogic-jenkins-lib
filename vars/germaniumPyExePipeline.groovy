@@ -120,49 +120,53 @@ def call(config) {
     // -------------------------------------------------------------------
     // Create local tool containers
     // -------------------------------------------------------------------
-    stage('Local Docker Container') {
-        node {
-            def parallelPublish = [:]
+    if (config.binaries.find({platform, config -> config.dockerToolContainer}) {
+        stage('Local Docker Container') {
+            node {
+                def parallelPublish = [:]
 
-            config.binaries.each { platformName, platformConfig ->
-                def dockerToolContainer = platformConfig.dockerToolContainer ?: false
+                config.binaries.each { platformName, platformConfig ->
+                    def dockerToolContainer = platformConfig.dockerToolContainer ?: false
 
-                if (!dockerToolContainer) {
-                    return
+                    if (!dockerToolContainer) {
+                        return
+                    }
+
+                    parallelPublish[platformName] = {
+                        dockerRm containers: [platformConfig.dockerTag]
+                        dockerRun image: platformConfig.dockerTag,
+                            name: platformConfig.dockerTag,
+                            command: "ls"
+                    }
                 }
 
-                parallelPublish[platformName] = {
-                    dockerRm containers: [platformConfig.dockerTag]
-                    dockerRun image: platformConfig.dockerTag,
-                        name: platformConfig.dockerTag,
-                        command: "ls"
-                }
+                parallel(parallelPublish)
             }
-
-            parallel(parallelPublish)
         }
     }
 
     // -------------------------------------------------------------------
     // Docker publish
     // -------------------------------------------------------------------
-    stage('Publish Docker') {
-        node {
-            def parallelPublish = [:]
+    if (config.binaries.find({platform, config -> config.dockerPublish}) {
+        stage('Publish Docker') {
+            node {
+                def parallelPublish = [:]
 
-            config.binaries.each { platformName, platformConfig ->
-                def dockerPublish = platformConfig.dockerPublish ?: false
+                config.binaries.each { platformName, platformConfig ->
+                    def dockerPublish = platformConfig.dockerPublish ?: false
 
-                if (!dockerPublish) {
-                    return
+                    if (!dockerPublish) {
+                        return
+                    }
+
+                    parallelPublish[platformName] = {
+                        dpush platformConfig.dockerTag
+                    }
                 }
 
-                parallelPublish[platformName] = {
-                    dpush platformConfig.dockerTag
-                }
+                parallel(parallelPublish)
             }
-
-            parallel(parallelPublish)
         }
     }
 }
