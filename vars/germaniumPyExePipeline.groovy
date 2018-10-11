@@ -71,6 +71,9 @@ def call(config) {
                     deleteDir()
                     checkout scm
 
+                    // do the version manager stamping
+                    versionManager()
+
                     if (platformConfig.extraSteps) {
                         platformConfig.extraSteps()
                     }
@@ -163,6 +166,32 @@ def call(config) {
 
                     parallelPublish[platformName] = {
                         dpush platformConfig.dockerTag
+                    }
+                }
+
+                parallel(parallelPublish)
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // GermaniumHQ Downloads Publish
+    // -------------------------------------------------------------------
+    if (config.binaries.find({platformName, platforConfig -> platforConfig.publishDownloads})) {
+        stage('Publish downloads.GermaniumHQ.com') {
+            node {
+                def parallelPublish = [:]
+
+                config.binaries.each { platformName, platformConfig ->
+                    def publishDownloads = platformConfig.publishDownloads ?: false
+
+                    if (!publishDownloads) {
+                        return
+                    }
+
+                    parallelPublish[platformName] = {
+                        unarchive
+                        ansiblePlay publishDownloads
                     }
                 }
 

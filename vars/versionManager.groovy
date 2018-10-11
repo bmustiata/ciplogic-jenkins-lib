@@ -3,14 +3,18 @@ def call(extraCommand) {
     def suffix = getGuid()
     def VERSION_MANAGER_IMAGE_NAME = 'version_manager'
 
+    extraCommand = extraCommand ?: ''
+
     try {
         sh """
-            docker cp ${VERSION_MANAGER_IMAGE_NAME}:/src/dist/version-manager /tmp/version-manager_${suffix}
-            chmod +x /tmp/version-manager_${suffix}
-            /tmp/version-manager_${suffix} ${extraCommand}
+            mkdir -p /tmp/version-manager/
+            docker cp ${VERSION_MANAGER_IMAGE_NAME}:/src/dist/version-manager /tmp/version-manager/version-manager
+            chmod +x /tmp/version-manager/version-manager
+            PATH="/tmp/version-manager:\$PATH"
+            version-manager ${extraCommand}
         """
     } finally {
-        sh "rm /tmp/version-manager_${suffix} || true"
+        sh "rm -fr /tmp/version-manager || true"
     }
 }
 
