@@ -13,49 +13,28 @@ def call(config) {
 
     safeParametersCheck(this)
 
+    ensureDockerTooling stage: "Tooling",
+        tools: ["mypy", "flake8", "ansible"]
+
     // -------------------------------------------------------------------
     // Static type checking for the project.
     // -------------------------------------------------------------------
-    stage('Type Check') {
-        if (!RUN_MYPY_CHECKS && !RUN_FLAKE8_CHECKS) {
-            return;
-        }
-
-        node {
-            deleteDir()
-            checkout scm
-
-            docker.build("mypy_${env.BUILD_ID}",
-                         '-f Dockerfile.py.build .')
-                  .inside("-v ${pwd()}:/src") {
-
-                def parallelChecks = [:]
-
-                if (RUN_MYPY_CHECKS) {
-                    parallelChecks."mypy" = {
-                        // We need to run it in the /src folder to pick the setup.cfg if present.
-                        sh """
-                            cd /src
-                            export MYPYPATH=/src/stubs
-                            mypy .
-                        """
-                    }
+    runContainers stage: "Type Check",
+        tools: [
+            "mypy": [
+                when: RUN_MYPY_CHECKS,
+                inside: {
+                    sh "cd /src; export MYPYPATH=/src/stubs; mypy ."
                 }
+            ],
 
-                if (RUN_FLAKE8_CHECKS) {
-                    parallelChecks."flake8" = {
-                        // We need to run it in the /src folder to pick the setup.cfg if present.
-                        sh """
-                            cd /src
-                            flake8 .
-                        """
-                    }
+            "flake8": [
+                when: RUN_FLAKE8_CHECKS,
+                inside: {
+                    sh "cd /src; flake8 ."
                 }
-
-                parallel(parallelChecks)
-            }
-        }
-    }
+            ]
+        ]
 
     // -------------------------------------------------------------------
     // Creation of the actual binaries per each platform, using GBS.
@@ -178,9 +157,12 @@ def call(config) {
     // GermaniumHQ Downloads Publish
     // -------------------------------------------------------------------
     if (config.binaries.find({platformName, platforConfig -> platforConfig.publishDownloads})) {
-        stage('Publish downloads.GermaniumHQ.com') {
+        stage('Publish on GermaniumHQ') {
             node {
-                def parallelPublish = [:]
+                deleteDir()
+                checkout scm
+
+                def unarchiveMapping = [:]
 
                 config.binaries.each { platformName, platformConfig ->
                     def publishDownloads = platformConfig.publishDownloads ?: false
@@ -189,13 +171,13 @@ def call(config) {
                         return
                     }
 
-                    parallelPublish[platformName] = {
-                        unarchive
-                        ansiblePlay publishDownloads
-                    }
+                    def exeName = platformConfig.exe.replaceAll("^.*/", "")
+                    unarchiveMapping["_archive/${exeName}"]=exeName
                 }
 
-                parallel(parallelPublish)
+                unarchive mapping: unarchiveMapping
+
+                ansiblePlay "bin/publish.yml"
             }
         }
     }
