@@ -159,15 +159,23 @@ def call(config) {
     // -------------------------------------------------------------------
     // GermaniumHQ Downloads Publish
     // -------------------------------------------------------------------
-    if (config.publishAnsiblePlay && env.BRANCH_NAME == "master") {
-        stage('Publish on GermaniumHQ') {
-            node {
-                deleteDir()
+    //if (config.publishAnsiblePlay && env.BRANCH_NAME == "master") {
+    ansiblePlay stage: "Publish on GermaniumHQ",
+        when: config.publishAnsiblePlay,
+        inside: {
+            input message: 'wut'
 
-                unarchive mapping: ["_archive": "."]
-                ansiblePlay "bin/publish.yml"
+            dir("/src") {
+                unarchive mapping: ["_archive/": "."]
             }
+
+            sh """
+                pwd; ls -la
+                cd /src
+                pwd; ls -la
+                export ANSIBLE_HOST_KEY_CHECKING=False
+                ansible-playbook --check -i /tmp/ANSIBLE_INVENTORY ${config.publishAnsiblePlay}
+            """
         }
-    }
 }
 

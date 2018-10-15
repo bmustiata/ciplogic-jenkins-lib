@@ -82,7 +82,7 @@ def call(config) {
     }
 
     if (config.stage) {
-        stage config.stage, runContainersClosure
+        stage(config.stage, runContainersClosure)
     } else {
         runContainersClosure()
     }
