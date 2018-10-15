@@ -13,6 +13,9 @@ def call(config) {
 
     safeParametersCheck(this)
 
+    // -------------------------------------------------------------------
+    // Ensure tooling is available
+    // -------------------------------------------------------------------
     ensureDockerTooling stage: "Tooling",
         tools: ["mypy", "flake8", "ansible"]
 
@@ -156,21 +159,13 @@ def call(config) {
     // -------------------------------------------------------------------
     // GermaniumHQ Downloads Publish
     // -------------------------------------------------------------------
-    if (config.binaries.find({platformName, platforConfig -> platforConfig.publishDownloads})) {
+    if (config.publishAnsiblePlay && env.BRANCH_NAME == "master") {
         stage('Publish on GermaniumHQ') {
             node {
                 deleteDir()
-                checkout scm
-
                 def unarchiveMapping = [:]
 
                 config.binaries.each { platformName, platformConfig ->
-                    def publishDownloads = platformConfig.publishDownloads ?: false
-
-                    if (!publishDownloads) {
-                        return
-                    }
-
                     def exeName = platformConfig.exe.replaceAll("^.*/", "")
                     unarchiveMapping["_archive/${exeName}"]=exeName
                 }
