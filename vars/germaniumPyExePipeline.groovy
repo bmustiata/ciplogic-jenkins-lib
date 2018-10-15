@@ -163,11 +163,7 @@ def call(config) {
     ansiblePlay stage: "Publish on GermaniumHQ",
         when: config.publishAnsiblePlay,
         inside: {
-            input message: 'wut'
-
-            dir("/src") {
-                unarchive mapping: ["_archive/": "."]
-            }
+            unarchive mapping: ["_archive/": "/src"]
 
             sh """
                 pwd; ls -la
