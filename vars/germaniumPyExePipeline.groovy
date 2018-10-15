@@ -163,12 +163,11 @@ def call(config) {
     ansiblePlay stage: "Publish on GermaniumHQ",
         when: config.publishAnsiblePlay,
         inside: {
-            unarchive mapping: ["_archive/": "/src"]
+            unarchive mapping: ["_archive/": "."]
 
             sh """
-                pwd; ls -la
+                mv ${pwd()}/_archive /src
                 cd /src
-                pwd; ls -la
                 export ANSIBLE_HOST_KEY_CHECKING=False
                 ansible-playbook --check -i /tmp/ANSIBLE_INVENTORY ${config.publishAnsiblePlay}
             """
