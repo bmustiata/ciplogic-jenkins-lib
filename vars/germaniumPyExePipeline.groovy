@@ -163,15 +163,8 @@ def call(config) {
         stage('Publish on GermaniumHQ') {
             node {
                 deleteDir()
-                def unarchiveMapping = [:]
 
-                config.binaries.each { platformName, platformConfig ->
-                    def exeName = platformConfig.exe.replaceAll("^.*/", "")
-                    unarchiveMapping["_archive/${exeName}"]=exeName
-                }
-
-                unarchive mapping: unarchiveMapping
-
+                unarchive mapping: [".": "."]
                 ansiblePlay "bin/publish.yml"
             }
         }
