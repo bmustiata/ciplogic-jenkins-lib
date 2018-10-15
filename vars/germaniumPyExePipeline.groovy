@@ -164,7 +164,7 @@ def call(config) {
             node {
                 deleteDir()
 
-                unarchive mapping: ["_archive/": "."]
+                unarchive mapping: ["_archive": "."]
                 ansiblePlay "bin/publish.yml"
             }
         }
