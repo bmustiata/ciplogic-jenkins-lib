@@ -166,7 +166,6 @@ def call(config) {
             unarchive mapping: ["_archive/": "."]
 
             sh """
-                mv ${pwd()}/_archive /src
                 cd /src
                 export ANSIBLE_HOST_KEY_CHECKING=False
                 ansible-playbook --check -i /tmp/ANSIBLE_INVENTORY ${config.publishAnsiblePlay}
