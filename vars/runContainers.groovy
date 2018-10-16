@@ -68,6 +68,7 @@ def call(config) {
                         checkout scm
 
                         def dockerParams = "-v ${pwd()}:/src"
+                        def toolTag = toolConfig.tag ?: "latest"
 
                         if (toolConfig.outside) {
                             toolConfig.outside { outsideResult ->
@@ -75,7 +76,7 @@ def call(config) {
                                     "${dockerParams} ${toolConfig.docker_params(outsideResult)}" :
                                     dockerParams
 
-                                docker.image("germaniumhq/tools-${toolName}")
+                                docker.image("germaniumhq/tools-${toolName}:${toolTag}")
                                       .inside(dockerParams, toolConfig.inside)
                             }
                         } else {
@@ -83,7 +84,7 @@ def call(config) {
                                 "${dockerParams} ${toolConfig.docker_params}" :
                                 dockerParams
 
-                            docker.image("germaniumhq/tools-${toolName}")
+                            docker.image("germaniumhq/tools-${toolName}:${toolTag}")
                                   .inside(dockerParams, toolConfig.inside)
                         }
                     }

@@ -62,10 +62,10 @@ def call(config) {
 
             "behave": [
                 when: RUN_BEHAVE_CHECKS,
-                docker_params: "--link vnc-server:vnc-server",
+                tag: config.name ?: "latest",
                 inside: {
                     try {
-                        sh "cd /src; DISPLAY=vnc-server:1 behave --junit"
+                        sh "cd /src; behave --junit"
                     } finally {
                         junit 'reports/*.xml'
                     }
@@ -104,6 +104,10 @@ def call(config) {
         }
 
         parallel(parallelBuilds)
+    }
+
+    if (config.postBuild) {
+        config.postBuild()
     }
 
     // -------------------------------------------------------------------

@@ -10,11 +10,9 @@ def call(reportsFolder, code) {
     def currentFolder = pwd()
 
     try {
-        echo "JUnit code block."
         code()
 
     } finally {
-        echo "Running JUnit archival"
         sh "mv '${reportsFolder}' '${currentFolder}/${reportsLocation}'"
         junit "${reportsLocation}/*.xml"
         sh "rm -fr ./${reportsLocation}"
