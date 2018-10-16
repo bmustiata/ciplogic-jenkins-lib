@@ -30,14 +30,6 @@ def call(config) {
                 name: "ansible",
                 when: config.publishAnsiblePlay && env.BRANCH_NAME == "master"
                 // when: config.publishAnsiblePlay && env.BRANCH_NAME == "master"
-            ], [
-                name: "behave",
-                tag: config.name ?: "latest",
-                when: RUN_BEHAVE_CHECKS,
-                before: {
-                    deleteDir()
-                    checkout scm
-                }
             ]
         ]
 

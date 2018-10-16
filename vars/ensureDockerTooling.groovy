@@ -19,14 +19,6 @@ def call(config) {
             FROM germaniumhq/python:3.6
             ENV REFRESHED_AT 2018.10.14-06:56:31
             RUN pip install flake8
-        """,
-
-        "behave": """\
-            FROM germaniumhq/python:3.6
-            ENV REFRESHED_AT 2018.10.16-04:57:23
-            RUN pip install behave
-            COPY requirements.txt /requirements.txt
-            RUN pip install -r requirements.txt
         """
     ]
 
