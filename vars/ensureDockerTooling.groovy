@@ -20,6 +20,14 @@ def call(config) {
             ENV REFRESHED_AT 2018.10.14-06:56:31
             RUN pip install flake8
         """,
+
+        "behave": """\
+            FROM germaniumhq/python:3.6
+            ENV REFRESHED_AT 2018.10.16-04:57:23
+            RUN pip install behave
+            COPY requirements.txt /requirements.txt
+            RUN pip install -r requirements.txt
+        """
     ]
 
     if (!config.tools) {
@@ -29,16 +37,33 @@ def call(config) {
     stage('Tooling') {
         def parallelToolBuild = [:]
 
-        config.tools.each { toolName ->
-            if (! toolName in availableTools) {
-                throw new IllegalArgumentException("Unable to find ${toolName} in available tools: ${availableTools.keySet}")
+        config.tools.each { tool ->
+            if (!(tool instanceof Map)) {
+                tool = [
+                    name: tool.name
+                ]
             }
 
-            parallelToolBuild."${toolName}" = {
-                node {
-                    deleteDir()
-                    writeFile file: "Dockerfile", text: availableTools[toolName]
-                    docker.build("germaniumhq/tools-${toolName}")
+            if (!availableTools.containsKey(tool.name)) {
+                throw new IllegalArgumentException("Unable to find ${tool.name} in available tools: ${availableTools.keySet()}")
+            }
+
+            def shouldRun = !tool.containsKey("when") || tool["when"]
+
+            if (shouldRun) {
+                parallelToolBuild."${tool.name}" = {
+                    node {
+                        if (tool.before) {
+                            tool.before()
+                        } else {
+                            deleteDir()
+                        }
+
+                        def toolTag = tool.tag ?: "latest"
+
+                        writeFile file: "Dockerfile", text: availableTools[tool.name]
+                        docker.build("germaniumhq/tools-${tool.name}:${toolTag}")
+                    }
                 }
             }
         }

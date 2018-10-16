@@ -1,13 +1,16 @@
 def call(config) {
     def runMyPyChecks = config.containsKey("runMyPy") ? config.runMyMy : true
     def runFlake8Checks = config.containsKey("runFlake8") ? config.runFlake8 : true
+    def runBehaveChecks = config.containsKey("runBehaveChecks") ? config.runBehaveChecks : true
 
     properties([
         safeParameters(this, [
             booleanParam(name: 'RUN_MYPY_CHECKS', defaultValue: runMyPyChecks,
                     description: 'Run the mypy type checks.'),
             booleanParam(name: 'RUN_FLAKE8_CHECKS', defaultValue: runFlake8Checks,
-                    description: 'Run the flake8 linting.')
+                    description: 'Run the flake8 linting.'),
+            booleanParam(name: 'RUN_BEHAVE_CHECKS', defaultValue: runBehaveChecks,
+                    description: 'Run the behave tests available in the project.')
         ])
     ])
 
@@ -17,12 +20,31 @@ def call(config) {
     // Ensure tooling is available
     // -------------------------------------------------------------------
     ensureDockerTooling stage: "Tooling",
-        tools: ["mypy", "flake8", "ansible"]
+        tools: [ [
+                name: "mypy",
+                when: RUN_MYPY_CHECKS
+            ], [
+                name: "flake8",
+                when: RUN_FLAKE8_CHECKS
+            ], [
+                name: "ansible",
+                when: config.publishAnsiblePlay && env.BRANCH_NAME == "master"
+                // when: config.publishAnsiblePlay && env.BRANCH_NAME == "master"
+            ], [
+                name: "behave",
+                tag: config.name ?: "latest",
+                when: RUN_BEHAVE_CHECKS,
+                before: {
+                    deleteDir()
+                    checkout scm
+                }
+            ]
+        ]
 
     // -------------------------------------------------------------------
-    // Static type checking for the project.
+    // Quality gate checking for the project.
     // -------------------------------------------------------------------
-    runContainers stage: "Type Check",
+    runContainers stage: "Checks",
         tools: [
             "mypy": [
                 when: RUN_MYPY_CHECKS,
@@ -36,6 +58,18 @@ def call(config) {
                 inside: {
                     sh "cd /src; flake8 ."
                 }
+            ],
+
+            "behave": [
+                when: RUN_BEHAVE_CHECKS,
+                docker_params: "--link vnc-server:vnc-server",
+                inside: {
+                    try {
+                        sh "cd /src; DISPLAY=vnc-server:1 behave --junit"
+                    } finally {
+                        junit 'reports/*.xml'
+                    }
+                },
             ]
         ]
 

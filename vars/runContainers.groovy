@@ -8,8 +8,9 @@ config:
     tools: Dict[str, [ToolDict|Callable]]  # config, or the inside block
 
 ToolDict:
-    inside: Callable
-    docker_params: str
+    outside: Callable[[], OutsideResult]
+    docker_params: str|Callable[[OutsideResult], str]
+    inside: Callable[[], None]
     when: boolean
 
 Samples:
@@ -67,12 +68,24 @@ def call(config) {
                         checkout scm
 
                         def dockerParams = "-v ${pwd()}:/src"
-                        dockerParams = toolConfig.docker_params ?
-                            "${dockerParams} ${toolConfig.docker_params}" :
-                            dockerParams
 
-                        docker.image("germaniumhq/tools-${toolName}")
-                              .inside(dockerParams, toolConfig.inside)
+                        if (toolConfig.outside) {
+                            toolConfig.outside { outsideResult ->
+                                dockerParams = toolConfig.docker_params ?
+                                    "${dockerParams} ${toolConfig.docker_params(outsideResult)}" :
+                                    dockerParams
+
+                                docker.image("germaniumhq/tools-${toolName}")
+                                      .inside(dockerParams, toolConfig.inside)
+                            }
+                        } else {
+                            dockerParams = toolConfig.docker_params ?
+                                "${dockerParams} ${toolConfig.docker_params}" :
+                                dockerParams
+
+                            docker.image("germaniumhq/tools-${toolName}")
+                                  .inside(dockerParams, toolConfig.inside)
+                        }
                     }
                 }
             }
