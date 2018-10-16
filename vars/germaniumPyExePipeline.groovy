@@ -1,16 +1,13 @@
 def call(config) {
     def runMyPyChecks = config.containsKey("runMyPy") ? config.runMyMy : true
     def runFlake8Checks = config.containsKey("runFlake8") ? config.runFlake8 : true
-    def runBehaveChecks = config.containsKey("runBehaveChecks") ? config.runBehaveChecks : true
 
     properties([
         safeParameters(this, [
             booleanParam(name: 'RUN_MYPY_CHECKS', defaultValue: runMyPyChecks,
                     description: 'Run the mypy type checks.'),
             booleanParam(name: 'RUN_FLAKE8_CHECKS', defaultValue: runFlake8Checks,
-                    description: 'Run the flake8 linting.'),
-            booleanParam(name: 'RUN_BEHAVE_CHECKS', defaultValue: runBehaveChecks,
-                    description: 'Run the behave tests available in the project.')
+                    description: 'Run the flake8 linting.')
         ])
     ])
 
@@ -50,18 +47,6 @@ def call(config) {
                 inside: {
                     sh "cd /src; flake8 ."
                 }
-            ],
-
-            "behave": [
-                when: RUN_BEHAVE_CHECKS,
-                tag: config.name ?: "latest",
-                inside: {
-                    try {
-                        sh "cd /src; behave --junit"
-                    } finally {
-                        junit 'reports/*.xml'
-                    }
-                },
             ]
         ]
 
