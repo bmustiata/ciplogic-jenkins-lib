@@ -26,7 +26,6 @@ def call(config) {
             ], [
                 name: "ansible",
                 when: config.publishAnsiblePlay && env.BRANCH_NAME == "master"
-                // when: config.publishAnsiblePlay && env.BRANCH_NAME == "master"
             ]
         ]
 
@@ -176,7 +175,7 @@ def call(config) {
     // -------------------------------------------------------------------
     //if (config.publishAnsiblePlay && env.BRANCH_NAME == "master") {
     ansiblePlay stage: "Publish on GermaniumHQ",
-        when: config.publishAnsiblePlay,
+        when: config.publishAnsiblePlay && env.BRANCH_NAME == "master",
         inside: {
             unarchive mapping: ["_archive/": "."]
 
