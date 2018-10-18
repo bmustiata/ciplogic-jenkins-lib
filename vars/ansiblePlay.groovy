@@ -3,6 +3,10 @@ def call(config) {
         config = [inside: config]
     }
 
+    if (!config.when) {
+        return
+    }
+
     runContainers stage: config.stage,
         tools: [
             ansible: [

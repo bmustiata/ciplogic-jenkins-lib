@@ -1,13 +1,16 @@
 def call(config) {
     def runMyPyChecks = config.containsKey("runMyPy") ? config.runMyMy : true
     def runFlake8Checks = config.containsKey("runFlake8") ? config.runFlake8 : true
+    def publishPublicPyPi = config.containsKey("publishPublicPyPi") ? config.publishPublicPyPi: false
 
     properties([
         safeParameters(this, [
             booleanParam(name: 'RUN_MYPY_CHECKS', defaultValue: runMyPyChecks,
                     description: 'Run the mypy type checks.'),
             booleanParam(name: 'RUN_FLAKE8_CHECKS', defaultValue: runFlake8Checks,
-                    description: 'Run the flake8 linting.')
+                    description: 'Run the flake8 linting.'),
+            booleanParam(name: 'FORCE_PYPI_PUBLISH', defaultValue: false,
+                    description: 'Forces pypi publishing even if not on master.')
         ])
     ])
 
@@ -25,7 +28,7 @@ def call(config) {
                 when: RUN_FLAKE8_CHECKS
             ], [
                 name: "ansible",
-                when: config.publishAnsiblePlay && env.BRANCH_NAME == "master"
+                when: config.publishAnsiblePlay && isTagVersion(env.BRANCH_NAME)
             ]
         ]
 
@@ -82,6 +85,9 @@ def call(config) {
         parallel(parallelBuilds)
     }
 
+    // -------------------------------------------------------------------
+    // Run post build steps, i.e. integration tests
+    // -------------------------------------------------------------------
     if (config.postBuild) {
         config.postBuild()
     }
@@ -118,6 +124,32 @@ def call(config) {
     }
 
     // -------------------------------------------------------------------
+    // Publish on pypi
+    // -------------------------------------------------------------------
+    if (isTagVersion(env.BRANCH_NAME) && config.binaries.find({platformName, platform -> platform.publishPypi})) {
+        stage('PiPy Publish') {
+            node {
+                def parallelPublish = [:]
+
+                config.binaries.each { platformName, platformConfig ->
+                    def publishPypiType = platformConfig.publishPypi ?: false
+
+                    if (!publishPypiType) {
+                        return
+                    }
+
+                    parallelPublish[platformName] = {
+                        docker.image(platformConfig.dockerTag).inside {
+                            publishPypi(publishPypiType)
+                        }
+                    }
+                }
+
+                parallel(parallelPublish)
+            }
+        }
+    }
+    // -------------------------------------------------------------------
     // Create local tool containers
     // -------------------------------------------------------------------
     if (config.binaries.find({platformName, platformConfig -> platformConfig.dockerToolContainer})) {
@@ -148,8 +180,8 @@ def call(config) {
     // -------------------------------------------------------------------
     // Docker publish
     // -------------------------------------------------------------------
-    if (config.binaries.find({platformName, platforConfig -> platforConfig.dockerPublish})) {
-        stage('Publish Docker') {
+    if (config.binaries.find({platformName, platform -> platform.dockerPublish})) {
+        stage('Local Docker Push') {
             node {
                 def parallelPublish = [:]
 
@@ -175,7 +207,7 @@ def call(config) {
     // -------------------------------------------------------------------
     //if (config.publishAnsiblePlay && env.BRANCH_NAME == "master") {
     ansiblePlay stage: "Publish on GermaniumHQ",
-        when: config.publishAnsiblePlay && env.BRANCH_NAME == "master",
+        when: config.publishAnsiblePlay && isTagVersion(env.BRANCH_NAME),
         inside: {
             unarchive mapping: ["_archive/": "."]
 

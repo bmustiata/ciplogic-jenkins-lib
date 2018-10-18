@@ -21,6 +21,10 @@ def call(config) {
             RUN pip install flake8
         """,
 
+        "python": """\
+            FROM germaniumhq/python:3.6
+        """,
+
         "git": """\
             FROM germaniumhq/ubuntu:18.04
             ENV REFRESHED_AT 2018.10.18-05:25:08
