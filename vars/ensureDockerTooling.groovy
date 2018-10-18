@@ -19,6 +19,14 @@ def call(config) {
             FROM germaniumhq/python:3.6
             ENV REFRESHED_AT 2018.10.14-06:56:31
             RUN pip install flake8
+        """,
+
+        "git": """\
+            FROM germaniumhq/ubuntu:18.04
+            ENV REFRESHED_AT 2018.10.18-05:25:08
+            USER root
+            RUN apt install -y git
+            USER germanium
         """
     ]
 
@@ -32,7 +40,7 @@ def call(config) {
         config.tools.each { tool ->
             if (!(tool instanceof Map)) {
                 tool = [
-                    name: tool.name
+                    name: tool
                 ]
             }
 
