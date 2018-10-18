@@ -25,7 +25,7 @@ def call(config) {
             FROM germaniumhq/ubuntu:18.04
             ENV REFRESHED_AT 2018.10.18-05:25:08
             USER root
-            RUN apt install -y git
+            RUN apt update -y && apt install -y git && rm -rf /var/lib/apt/lists/*
             USER germanium
         """
     ]
