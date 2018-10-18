@@ -108,6 +108,7 @@ def call(config) {
                         // in docker containers.
                         sh """
                             mkdir -p '${pwd()}/_archive'
+                            cd /src
                             cp '${platformConfig.exe}' '${pwd()}/_archive/${exeName}'
                         """
 
