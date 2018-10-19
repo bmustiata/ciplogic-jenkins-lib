@@ -28,7 +28,7 @@ def call(config) {
                 when: RUN_FLAKE8_CHECKS
             ], [
                 name: "ansible",
-                when: config.publishAnsiblePlay && isTagVersion(env.BRANCH_NAME)
+                when: config.publishAnsiblePlay && isTagVersion()
             ]
         ]
 
@@ -127,7 +127,7 @@ def call(config) {
     // -------------------------------------------------------------------
     // Publish on pypi
     // -------------------------------------------------------------------
-    if (isTagVersion(env.BRANCH_NAME) && config.binaries.find({platformName, platform -> platform.publishPypi})) {
+    if (isTagVersion() && config.binaries.find({platformName, platform -> platform.publishPypi})) {
         stage('PiPy Publish') {
             node {
                 def parallelPublish = [:]
@@ -153,7 +153,7 @@ def call(config) {
     // -------------------------------------------------------------------
     // Create local tool containers
     // -------------------------------------------------------------------
-    if (config.binaries.find({platformName, platformConfig -> platformConfig.dockerToolContainer})) {
+    if (isMasterBranch() && config.binaries.find({platformName, platformConfig -> platformConfig.dockerToolContainer})) {
         stage('Local Docker Container') {
             node {
                 def parallelPublish = [:]
@@ -181,7 +181,7 @@ def call(config) {
     // -------------------------------------------------------------------
     // Docker publish
     // -------------------------------------------------------------------
-    if (config.binaries.find({platformName, platform -> platform.dockerPublish})) {
+    if (isMasterBranch() && config.binaries.find({platformName, platform -> platform.dockerPublish})) {
         stage('Local Docker Push') {
             node {
                 def parallelPublish = [:]
@@ -206,9 +206,8 @@ def call(config) {
     // -------------------------------------------------------------------
     // GermaniumHQ Downloads Publish
     // -------------------------------------------------------------------
-    //if (config.publishAnsiblePlay && env.BRANCH_NAME == "master") {
     ansiblePlay stage: "Publish on GermaniumHQ",
-        when: config.publishAnsiblePlay && isTagVersion(env.BRANCH_NAME),
+        when: config.publishAnsiblePlay && isTagVersion(),
         inside: {
             unarchive mapping: ["_archive/": "."]
 

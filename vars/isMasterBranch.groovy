@@ -3,5 +3,5 @@ def call(String version) {
         version = env.BRANCH_HAME
     }
 
-    return version.matches("^\\d+\\.\\d+.*")
+    return version == "master"
 }
