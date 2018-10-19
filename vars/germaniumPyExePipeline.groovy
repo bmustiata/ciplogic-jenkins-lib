@@ -40,14 +40,14 @@ def call(config) {
             "mypy": [
                 when: RUN_MYPY_CHECKS,
                 inside: {
-                    sh "cd /src; export MYPYPATH=/src/stubs; mypy ."
+                    sh "export MYPYPATH=./stubs; mypy ."
                 }
             ],
 
             "flake8": [
                 when: RUN_FLAKE8_CHECKS,
                 inside: {
-                    sh "cd /src; flake8 ."
+                    sh "flake8 ."
                 }
             ]
         ]
@@ -213,7 +213,6 @@ def call(config) {
             unarchive mapping: ["_archive/": "."]
 
             sh """
-                cd /src
                 export ANSIBLE_HOST_KEY_CHECKING=False
                 ansible-playbook --check -i /tmp/ANSIBLE_INVENTORY ${config.publishAnsiblePlay}
             """

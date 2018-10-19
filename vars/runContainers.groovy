@@ -67,22 +67,21 @@ def call(config) {
                         deleteDir()
                         checkout scm
 
-                        def dockerParams = "-v ${pwd()}:/src"
                         def toolTag = toolConfig.tag ?: "latest"
 
                         if (toolConfig.outside) {
                             toolConfig.outside { outsideResult ->
-                                dockerParams = toolConfig.docker_params ?
-                                    "${dockerParams} ${toolConfig.docker_params(outsideResult)}" :
-                                    dockerParams
+                                def dockerParams = toolConfig.docker_params ?
+                                    toolConfig.docker_params(outsideResult) :
+                                    null
 
                                 docker.image("germaniumhq/tools-${toolName}:${toolTag}")
                                       .inside(dockerParams, toolConfig.inside)
                             }
                         } else {
-                            dockerParams = toolConfig.docker_params ?
-                                "${dockerParams} ${toolConfig.docker_params}" :
-                                dockerParams
+                            def dockerParams = toolConfig.docker_params ?
+                                toolConfig.docker_params :
+                                null
 
                             docker.image("germaniumhq/tools-${toolName}:${toolTag}")
                                   .inside(dockerParams, toolConfig.inside)
