@@ -172,7 +172,7 @@ def call(config) {
 
                     sh """
                         export ANSIBLE_HOST_KEY_CHECKING=False
-                        ansible-playbook --check -i /tmp/ANSIBLE_INVENTORY ${config.publishAnsiblePlay}
+                        ansible-playbook -i /tmp/ANSIBLE_INVENTORY ${config.publishAnsiblePlay}
                     """
                 }
         }
