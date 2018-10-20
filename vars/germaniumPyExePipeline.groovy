@@ -29,6 +29,8 @@ def call(config) {
             ], [
                 name: "ansible",
                 when: config.publishAnsiblePlay && isTagVersion()
+            ], [
+                name: "version-manager"
             ]
         ]
 
@@ -108,7 +110,6 @@ def call(config) {
                         // in docker containers.
                         sh """
                             mkdir -p '${pwd()}/_archive'
-                            cd /src
                             cp '${platformConfig.exe}' '${pwd()}/_archive/${exeName}'
                         """
 
@@ -143,58 +144,6 @@ def call(config) {
                         docker.image(platformConfig.dockerTag).inside {
                             publishPypi(publishPypiType)
                         }
-                    }
-                }
-
-                parallel(parallelPublish)
-            }
-        }
-    }
-    // -------------------------------------------------------------------
-    // Create local tool containers
-    // -------------------------------------------------------------------
-    if (isMasterBranch() && config.binaries.find({platformName, platformConfig -> platformConfig.dockerToolContainer})) {
-        stage('Local Docker Container') {
-            node {
-                def parallelPublish = [:]
-
-                config.binaries.each { platformName, platformConfig ->
-                    def dockerToolContainer = platformConfig.dockerToolContainer ?: false
-
-                    if (!dockerToolContainer) {
-                        return
-                    }
-
-                    parallelPublish[platformName] = {
-                        dockerRm containers: [platformConfig.dockerTag]
-                        dockerRun image: platformConfig.dockerTag,
-                            name: platformConfig.dockerTag,
-                            command: "ls"
-                    }
-                }
-
-                parallel(parallelPublish)
-            }
-        }
-    }
-
-    // -------------------------------------------------------------------
-    // Docker publish
-    // -------------------------------------------------------------------
-    if (isMasterBranch() && config.binaries.find({platformName, platform -> platform.dockerPublish})) {
-        stage('Local Docker Push') {
-            node {
-                def parallelPublish = [:]
-
-                config.binaries.each { platformName, platformConfig ->
-                    def dockerPublish = platformConfig.dockerPublish ?: false
-
-                    if (!dockerPublish) {
-                        return
-                    }
-
-                    parallelPublish[platformName] = {
-                        dpush platformConfig.dockerTag
                     }
                 }
 

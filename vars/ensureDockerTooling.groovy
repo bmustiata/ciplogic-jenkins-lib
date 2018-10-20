@@ -31,6 +31,10 @@ def call(config) {
             USER root
             RUN apt update -y && apt install -y git && rm -rf /var/lib/apt/lists/*
             USER germanium
+        """,
+
+        "version-manager": """\
+            FROM bmst/version-manager
         """
     ]
 

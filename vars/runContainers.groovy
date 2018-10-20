@@ -21,14 +21,14 @@ runContainers stage: "Type Check",
         "mypy": [
             when: RUN_MYPY_CHECKS,
             inside: {
-                sh "cd /src; export MYPYPATH=/src/stubs; mypy ."
+                sh "export MYPYPATH=./stubs; mypy ."
             }
         ],
 
         "flake8": [
             when: RUN_FLAKE8_CHECKS,
             inside: {
-                sh "cd /src; flake8 ."
+                sh "flake8 ."
             }
         ]
     ]
