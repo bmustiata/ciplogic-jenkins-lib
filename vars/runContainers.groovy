@@ -63,35 +63,34 @@ def call(config) {
 
             if (shouldRun) {
                 parallelContainers[toolName] = {
-                    node {
-                        deleteDir()
-                        checkout scm
+                    def toolTag = toolConfig.tag ?: "latest"
 
-                        def toolTag = toolConfig.tag ?: "latest"
-
-                        if (toolConfig.outside) {
-                            toolConfig.outside { outsideResult ->
-                                def dockerParams = toolConfig.docker_params ?
-                                    toolConfig.docker_params(outsideResult) :
-                                    null
-
-                                docker.image("germaniumhq/tools-${toolName}:${toolTag}")
-                                      .inside(dockerParams, toolConfig.inside)
-                            }
-                        } else {
+                    if (toolConfig.outside) {
+                        toolConfig.outside { outsideResult ->
                             def dockerParams = toolConfig.docker_params ?
-                                toolConfig.docker_params :
+                                toolConfig.docker_params(outsideResult) :
                                 null
 
                             docker.image("germaniumhq/tools-${toolName}:${toolTag}")
                                   .inside(dockerParams, toolConfig.inside)
                         }
+                    } else {
+                        def dockerParams = toolConfig.docker_params ?
+                            toolConfig.docker_params :
+                            null
+
+                        docker.image("germaniumhq/tools-${toolName}:${toolTag}")
+                              .inside(dockerParams, toolConfig.inside)
                     }
                 }
             }
         }
 
-        parallel(parallelContainers)
+        if (parallelContainers.size() == 1) {
+            parallelContainers.values().first()()
+        } else {
+            parallel(parallelContainers)
+        }
     }
 
     if (config.stage) {

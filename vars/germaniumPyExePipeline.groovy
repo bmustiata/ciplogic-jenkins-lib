@@ -37,22 +37,28 @@ def call(config) {
     // -------------------------------------------------------------------
     // Quality gate checking for the project.
     // -------------------------------------------------------------------
-    runContainers stage: "Checks",
-        tools: [
-            "mypy": [
-                when: RUN_MYPY_CHECKS,
-                inside: {
-                    sh "export MYPYPATH=./stubs; mypy ."
-                }
-            ],
+    stage('Checks') {
+        node {
+            deleteDir()
+            checkout scm
 
-            "flake8": [
-                when: RUN_FLAKE8_CHECKS,
-                inside: {
-                    sh "flake8 ."
-                }
-            ]
-        ]
+            runContainers tools: [
+                    "mypy": [
+                        when: RUN_MYPY_CHECKS,
+                        inside: {
+                            sh "export MYPYPATH=./stubs; mypy ."
+                        }
+                    ],
+
+                    "flake8": [
+                        when: RUN_FLAKE8_CHECKS,
+                        inside: {
+                            sh "flake8 ."
+                        }
+                    ]
+                ]
+        }
+    }
 
     // -------------------------------------------------------------------
     // Creation of the actual binaries per each platform, using GBS.
@@ -155,15 +161,22 @@ def call(config) {
     // -------------------------------------------------------------------
     // GermaniumHQ Downloads Publish
     // -------------------------------------------------------------------
-    ansiblePlay stage: "Publish on GermaniumHQ",
-        when: config.publishAnsiblePlay && isTagVersion(),
-        inside: {
-            unarchive mapping: ["_archive/": "."]
+    stage('Publish on GermaniumHQ') {
+        node {
+            deleteDir()
+            checkout scm
 
-            sh """
-                export ANSIBLE_HOST_KEY_CHECKING=False
-                ansible-playbook --check -i /tmp/ANSIBLE_INVENTORY ${config.publishAnsiblePlay}
-            """
+            ansiblePlay when: config.publishAnsiblePlay && isTagVersion(),
+                inside: {
+                    unarchive mapping: ["_archive/": "."]
+
+                    sh """
+                        export ANSIBLE_HOST_KEY_CHECKING=False
+                        ansible-playbook --check -i /tmp/ANSIBLE_INVENTORY ${config.publishAnsiblePlay}
+                    """
+                }
         }
+    }
+
 }
 
