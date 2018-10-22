@@ -159,7 +159,7 @@ def call(config) {
                     }
 
                     parallelPublish[platformName] = {
-                        docker.image(platformConfig.dockerTag).inside('--link nexus:nexus') {
+                        docker.image(platformConfig.dockerTag).inside {
                             publishPypi([type: platformConfig.publishPypi, server: 'nexus'])
                         }
                     }
