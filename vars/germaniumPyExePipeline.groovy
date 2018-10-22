@@ -67,7 +67,13 @@ def call(config) {
         def parallelBuilds = [:]
 
         config.binaries.each { platformName, platformConfig ->
-            def gbsPath = platformConfig.gbs ?: "/"
+            def gbsPath = platformConfig.gbs ?: "/Dockerfile"
+
+            if (!gbsPath.contains("Dockerfile")) {
+                gbsPath = "${gbsPath}Dockerfile"
+            }
+
+            def gbsPrefix = gbsPath.replaceAll("/[^/]*?\$", "/")
 
             parallelBuilds[platformName] = {
                 node {
@@ -75,15 +81,19 @@ def call(config) {
                     checkout scm
 
                     // do the version manager stamping
-                    versionManager()
+                    if (platformConfig.versionManager) {
+                        versionManager(platformConfig.versionManager)
+                    } else {
+                        versionManager()
+                    }
 
                     if (platformConfig.extraSteps) {
                         platformConfig.extraSteps()
                     }
 
                     dockerBuild(
-                        file: ".${gbsPath}Dockerfile",
-                        build_args: ["GBS_PREFIX=${gbsPath}"],
+                        file: ".${gbsPath}",
+                        build_args: ["GBS_PREFIX=${gbsPrefix}"],
                         tags: [platformConfig.dockerTag]
                     )
                 }
@@ -103,31 +113,60 @@ def call(config) {
     // -------------------------------------------------------------------
     // Archival of the binaries.
     // -------------------------------------------------------------------
-    stage('Archive') {
-        node {
-            def parallelArchiving = [:]
+    if (config.binaries.find({platformName, platform -> platform.exe})) {
+        stage('Archive') {
+            node {
+                def parallelArchiving = [:]
 
-            config.binaries.each { platformName, platformConfig ->
-                parallelArchiving[platformName] = {
-                    docker.image(platformConfig.dockerTag).inside {
-                        def exeName = platformConfig.exe.replaceAll("^.*/", "")
+                config.binaries.each { platformName, platformConfig ->
+                    parallelArchiving[platformName] = {
+                        docker.image(platformConfig.dockerTag).inside {
+                            def exeName = platformConfig.exe.replaceAll("^.*/", "")
 
-                        // W/A for archiveArtifacts that can't copy outside workspace even
-                        // in docker containers.
-                        sh """
-                            mkdir -p '${pwd()}/_archive'
-                            cp '${platformConfig.exe}' '${pwd()}/_archive/${exeName}'
-                        """
+                            // W/A for archiveArtifacts that can't copy outside workspace even
+                            // in docker containers.
+                            sh """
+                                mkdir -p '${pwd()}/_archive'
+                                cp '${platformConfig.exe}' '${pwd()}/_archive/${exeName}'
+                            """
 
-                        archiveArtifacts(
-                            artifacts: "_archive/${exeName}",
-                            fingerprint: true
-                        )
+                            archiveArtifacts(
+                                artifacts: "_archive/${exeName}",
+                                fingerprint: true
+                            )
+                        }
                     }
                 }
-            }
 
-            parallel(parallelArchiving)
+                parallel(parallelArchiving)
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // Publish on pypi
+    // -------------------------------------------------------------------
+    if (config.binaries.find({platformName, platform -> !platform.exe && platform.publishPypi})) {
+        stage('Nexus Publish') {
+            node {
+                def parallelPublish = [:]
+
+                config.binaries.each { platformName, platformConfig ->
+                    def publishPypiType = platformConfig.publishPypi ?: false
+
+                    if (!publishPypiType) {
+                        return
+                    }
+
+                    parallelPublish[platformName] = {
+                        docker.image(platformConfig.dockerTag).inside('--link nexus:nexus') {
+                            publishPypi([type: platformConfig.publishPypi, server: 'nexus'])
+                        }
+                    }
+                }
+
+                parallel(parallelPublish)
+            }
         }
     }
 
@@ -162,20 +201,22 @@ def call(config) {
     // -------------------------------------------------------------------
     // GermaniumHQ Downloads Publish
     // -------------------------------------------------------------------
-    stage('Publish on GermaniumHQ') {
-        node {
-            deleteDir()
-            checkout scm
+    if (config.publishAnsiblePlay && isTagVersion()) {
+        stage('Publish on GermaniumHQ') {
+            node {
+                deleteDir()
+                checkout scm
 
-            ansiblePlay when: config.publishAnsiblePlay && isTagVersion(),
-                inside: {
-                    unarchive mapping: ["_archive/": "."]
+                ansiblePlay when: config.publishAnsiblePlay && isTagVersion(),
+                    inside: {
+                        unarchive mapping: ["_archive/": "."]
 
-                    sh """
-                        export ANSIBLE_HOST_KEY_CHECKING=False
-                        ansible-playbook -i /tmp/ANSIBLE_INVENTORY ${config.publishAnsiblePlay}
-                    """
-                }
+                        sh """
+                            export ANSIBLE_HOST_KEY_CHECKING=False
+                            ansible-playbook -i /tmp/ANSIBLE_INVENTORY ${config.publishAnsiblePlay}
+                        """
+                    }
+            }
         }
     }
 

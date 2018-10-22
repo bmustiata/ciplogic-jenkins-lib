@@ -16,14 +16,20 @@ def call(config) {
         sh """
             cp ${env[credentialsFile]} /germanium/.pypirc
             chmod 600 /germanium/.pypirc
+
+            pwd
+            ls -la
         """
 
         if (config.type == "sdist") {
             sh """
+                set
+                cd /src
                 python setup.py sdist upload -r ${config.server}
             """
         } else if (config.type == "bdist") {
             sh """
+                cd /src
                 python setup.py bdist_wheel upload -r ${config.server}
             """
         } else {
