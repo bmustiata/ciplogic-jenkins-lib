@@ -148,7 +148,8 @@ def call(config) {
 
                     parallelPublish[platformName] = {
                         docker.image(platformConfig.dockerTag).inside {
-                            publishPypi(publishPypiType)
+                            publishPypi([type: platformConfig.publishPypi, server: 'pypitest'])
+                            publishPypi([type: platformConfig.publishPypi, server: 'pypimain'])
                         }
                     }
                 }
