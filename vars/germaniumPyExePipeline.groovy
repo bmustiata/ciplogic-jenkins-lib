@@ -1,16 +1,13 @@
 def call(config) {
     def runMyPyChecks = config.containsKey("runMyPy") ? config.runMyMy : true
     def runFlake8Checks = config.containsKey("runFlake8") ? config.runFlake8 : true
-    def publishPublicPyPi = config.containsKey("publishPublicPyPi") ? config.publishPublicPyPi: false
 
     properties([
         safeParameters(this, [
             booleanParam(name: 'RUN_MYPY_CHECKS', defaultValue: runMyPyChecks,
                     description: 'Run the mypy type checks.'),
             booleanParam(name: 'RUN_FLAKE8_CHECKS', defaultValue: runFlake8Checks,
-                    description: 'Run the flake8 linting.'),
-            booleanParam(name: 'FORCE_PYPI_PUBLISH', defaultValue: false,
-                    description: 'Forces pypi publishing even if not on master.')
+                    description: 'Run the flake8 linting.')
         ])
     ])
 
