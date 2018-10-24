@@ -58,20 +58,19 @@ def call(config) {
     }
 
     // -------------------------------------------------------------------
+    // Run pre build steps, i.e. some gbs container tests
+    // -------------------------------------------------------------------
+    if (config.preBuild) {
+        config.preBuild()
+    }
+
+    // -------------------------------------------------------------------
     // Creation of the actual binaries per each platform, using GBS.
     // -------------------------------------------------------------------
     stage('Build') {
         def parallelBuilds = [:]
 
         config.binaries.each { platformName, platformConfig ->
-            def gbsPath = platformConfig.gbs ?: "/Dockerfile"
-
-            if (!gbsPath.contains("Dockerfile")) {
-                gbsPath = "${gbsPath}Dockerfile"
-            }
-
-            def gbsPrefix = gbsPath.replaceAll("/[^/]*?\$", "/")
-
             parallelBuilds[platformName] = {
                 node {
                     deleteDir()
@@ -88,11 +87,8 @@ def call(config) {
                         platformConfig.extraSteps()
                     }
 
-                    dockerBuild(
-                        file: ".${gbsPath}",
-                        build_args: ["GBS_PREFIX=${gbsPrefix}"],
-                        tags: [platformConfig.dockerTag]
-                    )
+                    // platformConfig has both the dockerTag and gbs attributes
+                    gbsBuild(platformConfig)
                 }
             }
         }
