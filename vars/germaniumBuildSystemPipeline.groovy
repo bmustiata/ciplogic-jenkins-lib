@@ -2,7 +2,9 @@ def call(config) {
     properties([
         safeParameters(this, [
             booleanParam(name: 'USE_DOCKER_CACHES', defaultValue: true,
-                    description: 'Should the docker caching be used.')
+                    description: 'Should the docker caching be used.'),
+            booleanParam(name: 'PULL_BASE_DOCKER_IMAGES', defaultValue: false,
+                    description: 'Should the docker images be pulled')
         ])
     ])
 
@@ -12,12 +14,6 @@ def call(config) {
         node {
             deleteDir()
             checkout scm
-
-            if (!useCache) {
-                sh """
-                    docker pull \$(cat ${folderName}/Dockerfile | head -1 | cut -f2 -d\\ )
-                """
-            }
 
             docker.build(imageName, useCache ? folderName : "--no-cache ${folderName}")
         }
@@ -45,7 +41,7 @@ def call(config) {
     }
 
     stage('Fetch Base Images') {
-        if (USE_DOCKER_CACHES) {
+        if (!PULL_BASE_DOCKER_IMAGES) {
             return
         }
 
