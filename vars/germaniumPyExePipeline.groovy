@@ -87,8 +87,8 @@ def call(config) {
                         platformConfig.extraSteps()
                     }
 
-                    // platformConfig has both the dockerTag and gbs attributes
-                    gbsBuild(platformConfig)
+                    // platformConfig has both the dockerTag, prefix attributes
+                    gbs().build(platformConfig)
                 }
             }
         }
