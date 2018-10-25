@@ -44,6 +44,22 @@ def call(config) {
         parallel(parallelJobs)
     }
 
+    stage('Fetch Base Images') {
+        if (USE_DOCKER_CACHES) {
+            return
+        }
+
+        node {
+            deleteDir()
+            checkout scm
+
+            // this should actually scan the map and get the values, but meh.
+            sh """
+                docker pull \$(cat */Dockerfile | grep FROM | cut -f2 -d\\ | grep -v germaniumhq | sort -u)
+            """
+        }
+    }
+
     stage('Create Base/Run Containers') {
         runParallelTasks(config.baseImages, runDockerBuild, USE_DOCKER_CACHES)
     }
