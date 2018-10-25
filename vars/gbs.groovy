@@ -28,6 +28,7 @@ def call() {
                 RUN echo "################################################################################" &&\
                     echo "# INSTALL SOFTWARE" && \
                     echo "################################################################################" &&\
+                    cd /src && \
                     /src${GBS_PREFIX}_gbs/install-software/install-software.sh &&\
                     chown -R germanium:germanium /src
 
@@ -41,6 +42,7 @@ def call() {
                 RUN echo "################################################################################" &&\
                     echo "# PREPARE BUILD 1" && \
                     echo "################################################################################" &&\
+                    cd /src && \
                     /src${GBS_PREFIX}_gbs/prepare-build1/prepare-build1.sh
 
                 # build2
@@ -48,6 +50,7 @@ def call() {
                 RUN echo "################################################################################" &&\
                     echo "# PREPARE BUILD 2" && \
                     echo "################################################################################" &&\
+                    cd /src && \
                     /src${GBS_PREFIX}_gbs/prepare-build2/prepare-build2.sh
 
                 # build3
@@ -55,6 +58,7 @@ def call() {
                 RUN echo "################################################################################" &&\
                     echo "# PREPARE BUILD 3" && \
                     echo "################################################################################" &&\
+                    cd /src && \
                     /src${GBS_PREFIX}_gbs/prepare-build3/prepare-build3.sh
 
                 # test1
@@ -62,6 +66,7 @@ def call() {
                 RUN echo "################################################################################" &&\
                     echo "# PREPARE TEST 1" && \
                     echo "################################################################################" &&\
+                    cd /src && \
                     /src${GBS_PREFIX}_gbs/prepare-test1/prepare-test1.sh
 
                 # test2
@@ -69,6 +74,7 @@ def call() {
                 RUN echo "################################################################################" &&\
                     echo "# PREPARE TEST 2" && \
                     echo "################################################################################" &&\
+                    cd /src && \
                     /src${GBS_PREFIX}_gbs/prepare-test2/prepare-test2.sh
 
                 # sources are copied only after the test stage
@@ -92,6 +98,7 @@ def call() {
                 RUN echo "################################################################################" &&\
                     echo "# INSTALL SOFTWARE" && \
                     echo "################################################################################" &&\
+                    cd /src && \
                     /src${GBS_PREFIX}_gbs/install-software/install-software.sh &&\
                     chown -R germanium:germanium /src
 
@@ -105,6 +112,7 @@ def call() {
                 RUN echo "################################################################################" &&\
                     echo "# PREPARE BUILD 1" && \
                     echo "################################################################################" &&\
+                    cd /src && \
                     /src${GBS_PREFIX}_gbs/prepare-build1/prepare-build1.sh
 
                 # build2
@@ -112,6 +120,7 @@ def call() {
                 RUN echo "################################################################################" &&\
                     echo "# PREPARE BUILD 2" && \
                     echo "################################################################################" &&\
+                    cd /src && \
                     /src${GBS_PREFIX}_gbs/prepare-build2/prepare-build2.sh
 
                 # build3
@@ -119,6 +128,7 @@ def call() {
                 RUN echo "################################################################################" &&\
                     echo "# PREPARE BUILD 3" && \
                     echo "################################################################################" &&\
+                    cd /src && \
                     /src${GBS_PREFIX}_gbs/prepare-build3/prepare-build3.sh
 
                 # sources are copied only after the test stage
@@ -128,6 +138,7 @@ def call() {
                 RUN echo "################################################################################" &&\
                     echo "# RUN BUILD" && \
                     echo "################################################################################" &&\
+                    cd /src && \
                     /src${GBS_PREFIX}_gbs/run-build.sh
                 """
             )
