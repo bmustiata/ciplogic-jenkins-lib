@@ -36,8 +36,7 @@ def call(config) {
     // -------------------------------------------------------------------
     stage('Checks') {
         node {
-            deleteDir()
-            checkout scm
+            checkoutWithVersionManager()
 
             runContainers tools: [
                     "mypy": [
@@ -73,8 +72,7 @@ def call(config) {
         config.binaries.each { platformName, platformConfig ->
             parallelBuilds[platformName] = {
                 node {
-                    deleteDir()
-                    checkout scm
+                    checkoutWithVersionManager(platformConfig.versionManager)
 
                     // do the version manager stamping
                     if (platformConfig.versionManager) {
@@ -197,8 +195,7 @@ def call(config) {
     if (config.publishAnsiblePlay && isTagVersion()) {
         stage('Publish on GermaniumHQ') {
             node {
-                deleteDir()
-                checkout scm
+                checkoutWithVersionManager()
 
                 ansiblePlay when: config.publishAnsiblePlay && isTagVersion(),
                     inside: {
