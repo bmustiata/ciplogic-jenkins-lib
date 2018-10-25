@@ -54,9 +54,23 @@ def call(config) {
             checkout scm
 
             // this should actually scan the map and get the values, but meh.
-            sh """
-                docker pull \$(cat */Dockerfile | grep FROM | cut -f2 -d\\ | grep -v germaniumhq | sort -u)
-            """
+            def imagesToPull = sh([
+                script: """
+                    cat */Dockerfile | grep FROM | cut -f2 -d\\ | grep -v germaniumhq | sort -u
+                """,
+                returnStdout: true]).trim().split()
+
+            def imagesParallelTasks = [:]
+
+            imagesToPull.each { imageName ->
+                imagesParallelTasks."${imageName}" = {
+                    sh """
+                        docker pull ${imageName}
+                    """
+                }
+            }
+
+            parallel(imagesParallelTasks)
         }
     }
 
