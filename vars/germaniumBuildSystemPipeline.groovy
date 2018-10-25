@@ -1,10 +1,8 @@
 def call(config) {
     properties([
         safeParameters(this, [
-            booleanParam(name: 'USE_DOCKER_CACHES', defaultValue: true,
-                    description: 'Should the docker caching be used.'),
-            booleanParam(name: 'PULL_BASE_DOCKER_IMAGES', defaultValue: false,
-                    description: 'Should the docker images be pulled')
+            booleanParam(name: 'REFRESH_BUILD', defaultValue: false,
+                    description: 'Should all the base images be repulled, and caches ignored.')
         ])
     ])
 
@@ -41,7 +39,7 @@ def call(config) {
     }
 
     stage('Fetch Base Images') {
-        if (!PULL_BASE_DOCKER_IMAGES) {
+        if (!REFRESH_BUILD) {
             return
         }
 
@@ -70,19 +68,11 @@ def call(config) {
         }
     }
 
-    stage('Create Base/Run Containers') {
-        runParallelTasks(config.baseImages, runDockerBuild, USE_DOCKER_CACHES)
+    stage('Create Containers') {
+        runParallelTasks(config.platformImages, runDockerBuild, !REFRESH_BUILD)
     }
 
-    stage('Create Build Containers') {
-        runParallelTasks(config.runImages, runDockerBuild, true)
-    }
-
-    stage('Push docker containers') {
-        def allImages = [:]
-        allImages.putAll(config.baseImages)
-        allImages.putAll(config.runImages)
-
-        runParallelTasks(allImages, runDockerPush, true)
+    stage('Push Containers') {
+        runParallelTasks(config.platformImages, runDockerPush, true)
     }
 }
