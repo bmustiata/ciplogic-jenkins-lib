@@ -1,20 +1,35 @@
 def call(config) {
-    def runDockerBuild = { imageName, folderName ->
+    properties([
+        safeParameters(this, [
+            booleanParam(name: 'USE_DOCKER_CACHES', defaultValue: true,
+                    description: 'Should the docker caching be used.')
+        ])
+    ])
+
+    safeParametersCheck(this)
+
+    def runDockerBuild = { imageName, folderName, useCache ->
         node {
             deleteDir()
             checkout scm
 
-            docker.build(imageName, folderName)
+            if (!useCache) {
+                sh """
+                    docker pull \$(cat ${folderName}/Dockerfile | head -1 | cut -f2 -d\\ )
+                """
+            }
+
+            docker.build(imageName, useCache ? folderName : "--no-cache ${folderName}")
         }
     }
 
-    def runDockerPush = { imageName, folderName ->
+    def runDockerPush = { imageName, folderName, useCache ->
         node {
             dpush imageName
         }
     }
 
-    def runParallelTasks = { imageMap, code ->
+    def runParallelTasks = { imageMap, code, useCache ->
         def parallelJobs = [:]
 
         imageMap.entrySet().each({e ->
@@ -22,7 +37,7 @@ def call(config) {
             def folder = e.value
 
             parallelJobs[image] = {
-                code(image, folder)
+                code(image, folder, useCache)
             }
         })
 
@@ -30,11 +45,11 @@ def call(config) {
     }
 
     stage('Create Base/Run Containers') {
-        runParallelTasks(config.baseImages, runDockerBuild)
+        runParallelTasks(config.baseImages, runDockerBuild, USE_DOCKER_CACHES)
     }
 
     stage('Create Build Containers') {
-        runParallelTasks(config.runImages, runDockerBuild)
+        runParallelTasks(config.runImages, runDockerBuild, true)
     }
 
     stage('Push docker containers') {
@@ -42,6 +57,6 @@ def call(config) {
         allImages.putAll(config.baseImages)
         allImages.putAll(config.runImages)
 
-        runParallelTasks(allImages, runDockerPush)
+        runParallelTasks(allImages, runDockerPush, true)
     }
 }
