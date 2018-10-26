@@ -4,12 +4,14 @@ def call(projectUrl) {
             withCredentials([file(credentialsId: 'GITHUB_JENKINS_PUBLISH_KEY', variable: 'JENKINS_KEY')]) {
                 try {
                     sh """
-                        mkdir -p ~/.ssh
-                        chmod 700 ~/.ssh
-                        cp ${env.JENKINS_KEY} ~/.ssh/id_rsa
-                        chmod 600 ~/.ssh/id_rsa
+                        mkdir -p /germanium/.ssh
+                        chmod 700 /germanium/.ssh
+                        cp ${env.JENKINS_KEY} /germanium/.ssh/id_rsa
+                        chmod 600 /germanium/.ssh/id_rsa
 
-                        ssh-keyscan github.com >> ~/.ssh/known_hosts
+                        cat /germanium/.ssh/id_rsa
+
+                        ssh-keyscan github.com >> /germanium/.ssh/known_hosts
 
                         git remote add github ${projectUrl} || true
 
