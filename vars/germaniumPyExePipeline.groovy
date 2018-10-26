@@ -129,11 +129,11 @@ def call(config) {
     // -------------------------------------------------------------------
     // Publish on nexus
     // -------------------------------------------------------------------
-    if (config.binaries.find({platformName, platform -> !platform.exe && platform.publishPypi})) {
+    if (config.binaries.find({platformName, platform -> platform.publishPypi})) {
         stage('Nexus Publish') {
             node {
                 def binariesPlatforms = config.binaries.findAll({platformName, platform ->
-                    !platform.exe && platform.publishPypi
+                    platform.publishPypi
                 })
 
                 parallelMap(binariesPlatforms, { platformName, platformConfig ->
@@ -151,7 +151,7 @@ def call(config) {
     if (isTagVersion() && config.binaries.find({platformName, platform -> platform.publishPypi})) {
         stage('PiPy Publish') {
             def binariesPlatforms = config.binaries.findAll({platformName, platform ->
-                !platform.exe && platform.publishPypi
+                platform.publishPypi
             })
 
             parallelMap(binariesPlatforms, { platformName, platformConfig ->
