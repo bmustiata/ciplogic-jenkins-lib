@@ -1,4 +1,16 @@
 @NonCPS
+def parseUrl(String gitUrl) {
+    def m = (gitUrl =~ /(.*?\:\/\/)?(.*?@)?(.+?)(\:.+)?\/.*/)
+
+    if (!m.matches()) {
+        throw new IllegalArgumentException("Unable to parse git url: ${gitUrl}")
+    }
+
+    def serverName = m.group(3)
+
+    return serverName
+}
+
 def call(config) {
     if (!config || !config.repo) {
         throw new IllegalArgumentException("You need to pass a `repo` config argument where git is")
@@ -23,14 +35,7 @@ def call(config) {
                     def gitPushParallel = [:]
 
                     config.repo.each { gitUrl ->
-
-                        def m = (gitUrl =~ /(.*?\:\/\/)?(.*?@)?(.+?)(\:.+)?\/.*/)
-
-                        if (!m.matches()) {
-                            throw new IllegalArgumentException("Unable to parse git url: ${gitUrl}")
-                        }
-
-                        def serverName = m.group(3)
+                        def serverName = parseUrl(gitUrl)
 
                         gitPushParallel."${serverName}" = {
                             sh """
