@@ -14,7 +14,7 @@ def call(projectUrl) {
                         git remote add github ${projectUrl} || true
 
                         git push github HEAD:master
-                        git push github --tags
+                        git push github --tags -f
                     """
                 } finally {
                     sh """
