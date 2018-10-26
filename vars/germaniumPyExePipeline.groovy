@@ -216,13 +216,13 @@ def call(config) {
     // -------------------------------------------------------------------
     // github.com publish
     // -------------------------------------------------------------------
-    if (config.github && isMasterBranch()) {
+    if (config.repo && isMasterBranch()) {
         stage('Publish on github') {
             node {
                 deleteDir()
                 checkout scm
 
-                publishGit(config.github)
+                publishGit(config)
             }
         }
     }

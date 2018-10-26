@@ -1,4 +1,8 @@
 def call(config) {
+    if (!config || !config.repo) {
+        throw new IllegalArgumentException("You need to pass a `repo` config argument where git is")
+    }
+
     if (!(config.repo instanceof List)) {
         config.repo = [ config.repo ]
     }
