@@ -70,7 +70,7 @@ def call(config) {
     // Creation of the actual binaries per each platform, using GBS.
     // -------------------------------------------------------------------
     stage('Build') {
-        parallelEachMap(config.binaries, { platformName, platformConfig ->
+        parallelMap(config.binaries, { platformName, platformConfig ->
             node {
                 checkoutWithVersionManager(platformConfig.versionManager)
 
@@ -105,7 +105,7 @@ def call(config) {
         stage('Archive') {
             node {
                 def exePlatforms = config.binaries.findAll({platformName, platform -> platform.exe})
-                parallelEachMap(exePlatforms, { platformName, platform ->
+                parallelMap(exePlatforms, { platformName, platform ->
                         docker.image(platform.dockerTag).inside {
                             def exeName = platform.exe.replaceAll("^.*/", "")
 
