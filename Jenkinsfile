@@ -9,6 +9,6 @@ stage('Publish Git') {
         deleteDir()
         checkout scm
 
-        publishGit("git@github.com:bmustiata/ciplogic-jenkins-lib.git")
+        publishGit repo: "git@github.com:bmustiata/ciplogic-jenkins-lib.git"
     }
 }
