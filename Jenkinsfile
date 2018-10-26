@@ -1,9 +1,8 @@
 if (!isMasterBranch()) {
     return
 }
-stage('Tooling') {
-    ensureDockerTooling tools: "git"
-}
+
+ensureDockerTooling tools: "git"
 
 stage('Publish Git') {
     node {
