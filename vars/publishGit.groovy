@@ -5,6 +5,7 @@ def call(projectUrl) {
                 try {
                     sh """
                         mkdir -p ~/.ssh
+                        chmod 700 ~/.ssh
                         cp ${env.JENKINS_KEY} ~/.ssh/id_rsa
                         chmod 600 ~/.ssh/id_rsa
 
