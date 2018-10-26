@@ -70,31 +70,25 @@ def call(config) {
     // Creation of the actual binaries per each platform, using GBS.
     // -------------------------------------------------------------------
     stage('Build') {
-        def parallelBuilds = [:]
+        parallelEachMap(config.binaries, { platformName, platformConfig ->
+            node {
+                checkoutWithVersionManager(platformConfig.versionManager)
 
-        config.binaries.each { platformName, platformConfig ->
-            parallelBuilds[platformName] = {
-                node {
-                    checkoutWithVersionManager(platformConfig.versionManager)
-
-                    // do the version manager stamping
-                    if (platformConfig.versionManager) {
-                        versionManager(platformConfig.versionManager)
-                    } else {
-                        versionManager()
-                    }
-
-                    if (platformConfig.extraSteps) {
-                        platformConfig.extraSteps()
-                    }
-
-                    // platformConfig has both the dockerTag, prefix attributes
-                    gbs().build(platformConfig)
+                // do the version manager stamping
+                if (platformConfig.versionManager) {
+                    versionManager(platformConfig.versionManager)
+                } else {
+                    versionManager()
                 }
-            }
-        }
 
-        parallel(parallelBuilds)
+                if (platformConfig.extraSteps) {
+                    platformConfig.extraSteps()
+                }
+
+                // platformConfig has both the dockerTag, prefix attributes
+                gbs().build(platformConfig)
+            }
+        })
     }
 
     // -------------------------------------------------------------------
@@ -110,56 +104,43 @@ def call(config) {
     if (config.binaries.find({platformName, platform -> platform.exe})) {
         stage('Archive') {
             node {
-                def parallelArchiving = [:]
-
-                config.binaries.each { platformName, platformConfig ->
-                    parallelArchiving[platformName] = {
-                        docker.image(platformConfig.dockerTag).inside {
-                            def exeName = platformConfig.exe.replaceAll("^.*/", "")
+                def exePlatforms = config.binaries.findAll({platformName, platform -> platform.exe})
+                parallelEachMap(exePlatforms, { platformName, platform ->
+                        docker.image(platform.dockerTag).inside {
+                            def exeName = platform.exe.replaceAll("^.*/", "")
 
                             // W/A for archiveArtifacts that can't copy outside workspace even
                             // in docker containers.
                             sh """
                                 mkdir -p '${pwd()}/_archive'
-                                cp '${platformConfig.exe}' '${pwd()}/_archive/${exeName}'
+                                cp '${platform.exe}' '${pwd()}/_archive/${exeName}'
                             """
 
                             archiveArtifacts(
                                 artifacts: "_archive/${exeName}",
                                 fingerprint: true
                             )
-                        }
                     }
-                }
-
-                parallel(parallelArchiving)
+                })
             }
         }
     }
 
     // -------------------------------------------------------------------
-    // Publish on pypi
+    // Publish on nexus
     // -------------------------------------------------------------------
     if (config.binaries.find({platformName, platform -> !platform.exe && platform.publishPypi})) {
         stage('Nexus Publish') {
             node {
-                def parallelPublish = [:]
+                def binariesPlatforms = config.binaries.findAll({platformName, platform ->
+                    !platform.exe && platform.publishPypi
+                })
 
-                config.binaries.each { platformName, platformConfig ->
-                    def publishPypiType = platformConfig.publishPypi ?: false
-
-                    if (!publishPypiType) {
-                        return
+                parallelMap(binariesPlatforms, { platformName, platformConfig ->
+                    docker.image(platformConfig.dockerTag).inside {
+                        publishPypi([type: platformConfig.publishPypi, server: 'nexus'])
                     }
-
-                    parallelPublish[platformName] = {
-                        docker.image(platformConfig.dockerTag).inside {
-                            publishPypi([type: platformConfig.publishPypi, server: 'nexus'])
-                        }
-                    }
-                }
-
-                parallel(parallelPublish)
+                })
             }
         }
     }
@@ -169,26 +150,16 @@ def call(config) {
     // -------------------------------------------------------------------
     if (isTagVersion() && config.binaries.find({platformName, platform -> platform.publishPypi})) {
         stage('PiPy Publish') {
-            node {
-                def parallelPublish = [:]
+            def binariesPlatforms = config.binaries.findAll({platformName, platform ->
+                !platform.exe && platform.publishPypi
+            })
 
-                config.binaries.each { platformName, platformConfig ->
-                    def publishPypiType = platformConfig.publishPypi ?: false
-
-                    if (!publishPypiType) {
-                        return
-                    }
-
-                    parallelPublish[platformName] = {
-                        docker.image(platformConfig.dockerTag).inside {
-                            publishPypi([type: platformConfig.publishPypi, server: 'pypitest'])
-                            publishPypi([type: platformConfig.publishPypi, server: 'pypimain'])
-                        }
-                    }
+            parallelMap(binariesPlatforms, { platformName, platformConfig ->
+                docker.image(platformConfig.dockerTag).inside {
+                        publishPypi([type: platformConfig.publishPypi, server: 'pypitest'])
+                        publishPypi([type: platformConfig.publishPypi, server: 'pypimain'])
                 }
-
-                parallel(parallelPublish)
-            }
+            })
         }
     }
 
