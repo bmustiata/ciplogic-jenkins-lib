@@ -39,7 +39,7 @@ def call(config) {
     // -------------------------------------------------------------------
     stage('Checks') {
         node {
-            checkoutWithVersionManager()
+            checkoutWithVersionManager(config.versionManager)
 
             runContainers tools: [
                     "mypy": [
@@ -198,7 +198,7 @@ def call(config) {
     if (config.publishAnsiblePlay && isTagVersion()) {
         stage('Publish on GermaniumHQ') {
             node {
-                checkoutWithVersionManager()
+                checkoutWithVersionManager(config.versionManager)
 
                 ansiblePlay when: config.publishAnsiblePlay && isTagVersion(),
                     inside: {
