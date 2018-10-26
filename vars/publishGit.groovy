@@ -21,7 +21,7 @@ def call(config) {
 
                     def gitPushParallel = [:]
 
-                    config.repo.forEach { gitUrl ->
+                    config.repo.each { gitUrl ->
 
                         def m = (gitUrl =~ /(.*?\:\/\/)?(.*?@)?(.+?)(\:.+)?\/.*/)
 
@@ -29,7 +29,7 @@ def call(config) {
                             throw new IllegalArgumentException("Unable to parse git url: ${gitUrl}")
                         }
 
-                        def serverName = m.group(3) as String
+                        def serverName = m.group(3)
 
                         gitPushParallel."${serverName}" = {
                             sh """
