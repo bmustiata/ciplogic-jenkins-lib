@@ -9,8 +9,6 @@ def call(projectUrl) {
                         cp ${env.JENKINS_KEY} /germanium/.ssh/id_rsa
                         chmod 600 /germanium/.ssh/id_rsa
 
-                        cat /germanium/.ssh/id_rsa
-
                         ssh-keyscan github.com >> /germanium/.ssh/known_hosts
 
                         git remote add github ${projectUrl} || true
