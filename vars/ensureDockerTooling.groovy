@@ -42,6 +42,10 @@ def call(config) {
         throw new IllegalArgumentException("You need to specify the tools you need in `config.tools`")
     }
 
+    if (!(config.tools instanceof List)) {
+        config.tools = [config.tools]
+    }
+
     stage('Tooling') {
         def parallelToolBuild = [:]
 
