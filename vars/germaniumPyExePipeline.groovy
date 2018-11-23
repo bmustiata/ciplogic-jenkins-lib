@@ -187,13 +187,19 @@ def call(config) {
     // -------------------------------------------------------------------
     // github.com publish
     // -------------------------------------------------------------------
-    if (config.repo && isMasterBranch()) {
+    if (config.repo && (isMasterBranch() || isTagVersion())) {
         stage('Publish on github') {
             node {
                 deleteDir()
                 checkout scm
 
-                publishGit(config)
+                if (isMasterBranch()) {
+                    publishGit(config)
+                }
+
+                if (isTagVersion()) {
+                    publishGitTags(config)
+                }
             }
         }
     }

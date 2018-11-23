@@ -43,7 +43,7 @@ def call(config) {
 
                                 git remote add ${serverName} ${gitUrl} || true
 
-                                git push ${serverName} HEAD:master
+                                git push ${serverName} --tags -f
                             """
                         }
                     }
