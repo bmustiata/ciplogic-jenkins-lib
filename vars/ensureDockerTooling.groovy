@@ -26,9 +26,10 @@ def call(config) {
         """,
 
         "behave": """\
-            FROM germaniumhq/python:3.6
+            FROM python:3.6
 
             RUN pip install behave
+            RUN curl https://get.docker.com | sh
         """,
 
         "git": """\

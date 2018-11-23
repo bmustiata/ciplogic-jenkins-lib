@@ -81,12 +81,24 @@ def call(config) {
             deleteDir()
             checkout scm
 
+            // run the container with the same groups, so docker can execute normally
+            def userGroupIds = sh(script: "id -G", returnStdout: true)
+                .trim()
+                .split()
+                .collect({
+                    groupId -> "--group-add ${groupId}"
+                }).join(" ")
+
             runContainers tools: [
-                behave: {
-                    sh """
-                        behave
-                    """
-                }
+                behave: [
+                    docker_params: "${userGroupIds} -v /var/run/docker.sock:/var/run/docker.sock",
+                    inside : {
+                        sh """
+                            id
+                            behave
+                        """
+                    }
+                ]
             ]
         }
     }
