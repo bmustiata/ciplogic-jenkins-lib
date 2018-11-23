@@ -25,6 +25,12 @@ def call(config) {
             FROM germaniumhq/python:3.6
         """,
 
+        "behave": """\
+            FROM germaniumhq/python:3.6
+
+            RUN pip install behave
+        """,
+
         "git": """\
             FROM germaniumhq/ubuntu:18.04
             ENV REFRESHED_AT 2018.10.18-05:25:08

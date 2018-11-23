@@ -38,6 +38,10 @@ def call(config) {
         parallel(parallelJobs)
     }
 
+    stage('Prepare tooling') {
+        ensureDockerTooling tools: "behave"
+    }
+
     stage('Fetch Base Images') {
         if (!REFRESH_BUILD) {
             return
@@ -72,7 +76,23 @@ def call(config) {
         runParallelTasks(config.platformImages, runDockerBuild, !REFRESH_BUILD)
     }
 
+    stage('Test Containers') {
+        node {
+            deleteDir()
+            checkout scm
+
+            runContainers tools: [
+                behave: {
+                    sh """
+                        behave
+                    """
+                }
+            ]
+        }
+    }
+
     stage('Push Containers') {
         runParallelTasks(config.platformImages, runDockerPush, true)
     }
 }
+
