@@ -41,7 +41,7 @@ def call(config) {
         """,
 
         "version-manager": """\
-            FROM bmst/version-manager
+            FROM bmst/version-manager:2.1.0
         """
     ]
 
