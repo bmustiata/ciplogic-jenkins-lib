@@ -6,7 +6,9 @@ def call(extraCommand) {
     runContainers tools: [
         "version-manager": {
             echo "VERSION_MANAGER"
-            set
+            sh """
+                set
+            """
             sh "version-manager ${extraCommand}"
         }
     ]
