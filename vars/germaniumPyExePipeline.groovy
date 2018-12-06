@@ -74,13 +74,6 @@ def call(config) {
             node {
                 checkoutWithVersionManager(platformConfig.versionManager)
 
-                // do the version manager stamping
-                if (platformConfig.versionManager) {
-                    versionManager(platformConfig.versionManager)
-                } else {
-                    versionManager()
-                }
-
                 if (platformConfig.extraSteps) {
                     platformConfig.extraSteps()
                 }
