@@ -5,11 +5,12 @@ def call(extraCommand) {
     extraCommand = extraCommand ?: ''
     runContainers tools: [
         "version-manager": {
-            echo "VERSION_MANAGER"
             sh """
-                set
+                export BRANCH_NAME="${env.BRANCH_NAME}"
+                export BUILD_ID="${env.BUILD_ID}"
+
+                version-manager ${extraCommand}
             """
-            sh "version-manager ${extraCommand}"
         }
     ]
 }
