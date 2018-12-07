@@ -19,7 +19,7 @@ def call(config) {
 
             def buildArgs = folderName
 
-            if (useCache) {
+            if (!useCache) {
                 buildArgs = "--no-cache ${buildArgs}"
             }
 
