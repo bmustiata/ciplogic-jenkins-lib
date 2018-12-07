@@ -128,7 +128,9 @@ def call(config) {
     }
 
     stage('Push Containers') {
-        runParallelTasks(config.platformImages, runDockerPush, true)
+        runParallelTasks(config.platformImages.collectEntries({ it }),
+                         runDockerPush,
+                         true)
     }
 }
 
