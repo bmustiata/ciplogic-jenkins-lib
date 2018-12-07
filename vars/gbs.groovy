@@ -1,3 +1,9 @@
+/*
+Usage:
+gbs(platform: 'python:3.6',
+    dockerTag: '123',
+    prefix?: '/') -> returns a docker.image  // must end in /
+*/
 def createDockerImage(config, dockerfileContent) {
     def dockerFileName = "/tmp/_Dockerfile.gbs-${getGuid()}"
     def dockerFile = new File(dockerFileName)
