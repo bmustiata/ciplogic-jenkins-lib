@@ -8,18 +8,34 @@ def call(config) {
 
     safeParametersCheck(this)
 
-    def runDockerBuild = { imageName, folderName, useCache ->
+    def runDockerBuild = { images, folderName, useCache ->
         node {
             deleteDir()
             checkout scm
 
-            docker.build(imageName, useCache ? folderName : "--no-cache ${folderName}")
+            def extraTags = images.drop(1)
+                              .collect({tag -> "-t ${tag}"})
+                              .join(" ")
+
+            def buildArgs = folderName
+
+            if (useCache) {
+                buildArgs = "--no-cache ${buildArgs}"
+            }
+
+            if (extraTags) {
+                buildArgs = "${extraTags} ${buildArgs}"
+            }
+
+            docker.build(images[0], buildArgs)
         }
     }
 
-    def runDockerPush = { imageName, folderName, useCache ->
+    def runDockerPush = { images, folderName, useCache ->
         node {
-            dpush imageName
+            images.each { imageName ->
+                dpush imageName
+            }
         }
     }
 
@@ -27,11 +43,15 @@ def call(config) {
         def parallelJobs = [:]
 
         imageMap.entrySet().each({e ->
-            def image = e.key
-            def folder = e.value
+            def folder = e.key
+            def images = e.value
 
-            parallelJobs[image] = {
-                code(image, folder, useCache)
+            if (!(images instanceof List)) {
+                images = [ images ]
+            }
+
+            parallelJobs[folder] = {
+                code(images, folder, useCache)
             }
         })
 
@@ -72,8 +92,12 @@ def call(config) {
         }
     }
 
-    stage('Create Containers') {
-        runParallelTasks(config.platformImages, runDockerBuild, !REFRESH_BUILD)
+    config.platformImages.eachWithIndex { containersMap, index ->
+        stage("Create Containers ${index}") {
+                runParallelTasks(containersMap,
+                                 runDockerBuild,
+                                 !REFRESH_BUILD)
+        }
     }
 
     stage('Test Containers') {
