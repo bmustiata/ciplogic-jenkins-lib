@@ -1,0 +1,4 @@
+dpush
+    dockerTag: string
+    publishLocal?: boolean
+    publishDockerHub?: boolean

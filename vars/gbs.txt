@@ -1,0 +1,10 @@
+# Usage
+
+gbs().build(platform: 'python:3.6',
+            dockerTag: '...',
+            prefix?: '/') -> returns a docker.image // must end in /
+
+gbs().test(platform: 'python:3.6',
+           dockerTag: '...',
+           prefix?: '/') -> returns a docker.image // must end in /
+

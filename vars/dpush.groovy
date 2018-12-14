@@ -1,6 +1,25 @@
-def call(image_name) {
-    sh """
-        docker tag ${image_name} sami:5000/${image_name}
-        docker push sami:5000/${image_name}
-    """
+def call(config) {
+    if (!(config instanceof Map)) {
+        config = [
+            dockerTag: config,
+            publishLocal: true,
+        ]
+    }
+
+    if (config.pushDockerSami) {
+        sh """
+            docker tag ${config.dockerTag} sami:5000/${config.dockerTag}
+            docker push sami:5000/${config.dockerTag}
+        """
+    }
+
+    if (config.pushDockerHub) {
+        withCredentials([file(credentialsId: 'DOCKERHUB_LOGIN', variable: 'DOCKERHUB_LOGIN')]) {
+            sh """
+                cat \$DOCKERHUB_LOGIN | docker login --username germaniumhq --password-stdin
+                docker push ${config.dockerTag}
+            """
+        }
+    }
 }
+
