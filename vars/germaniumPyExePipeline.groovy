@@ -178,10 +178,10 @@ def call(config) {
     }
 
     // -------------------------------------------------------------------
-    // github.com publish
+    // git servers push publish
     // -------------------------------------------------------------------
     if (config.repo && (isMasterBranch() || isTagVersion())) {
-        stage('Publish on github') {
+        stage('Publish git repo(s)') {
             node {
                 deleteDir()
                 checkout scm

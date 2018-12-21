@@ -1,0 +1,15 @@
+Usage:
+
+config:
+    repo: "git-url"
+
+or:
+
+config:
+    repo: [
+        "git-url-1",
+        "git-url-2",
+    ]
+
+This will publish using the `GITHUB_JENKINS_PUBLISH_KEY` that must be the
+`id_rsa` private key file.

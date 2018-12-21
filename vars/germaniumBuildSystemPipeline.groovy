@@ -132,5 +132,25 @@ def call(config) {
                          runDockerPush,
                          true)
     }
+
+    // -------------------------------------------------------------------
+    // git servers push publish
+    // -------------------------------------------------------------------
+    if (config.repo && (isMasterBranch() || isTagVersion())) {
+        stage('Publish git repo(s)') {
+            node {
+                deleteDir()
+                checkout scm
+
+                if (isMasterBranch()) {
+                    publishGit(config)
+                }
+
+                if (isTagVersion()) {
+                    publishGitTags(config)
+                }
+            }
+        }
+    }
 }
 
