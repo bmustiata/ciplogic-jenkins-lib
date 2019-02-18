@@ -8,8 +8,8 @@ def call(config) {
 
     if (config.pushDockerSami) {
         sh """
-            docker tag ${config.dockerTag} sami:5000/${config.dockerTag}
-            docker push sami:5000/${config.dockerTag}
+            docker tag ${config.dockerTag} ge-registry/${config.dockerTag}
+            docker push ge-registry/${config.dockerTag}
         """
     }
 
