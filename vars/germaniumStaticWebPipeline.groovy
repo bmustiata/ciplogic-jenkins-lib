@@ -1,4 +1,10 @@
 def call(config) {
+    ensureDockerTooling stage: "Tooling",
+        tools: [ [
+                name: "version-manager"
+            ]
+        ]
+
     stage('Test') {
         node {
             checkoutWithVersionManager()
