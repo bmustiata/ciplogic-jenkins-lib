@@ -130,7 +130,7 @@ def call(config) {
                 })
 
                 parallelMap(binariesPlatforms, { platformName, platformConfig ->
-                    docker.image(platformConfig.dockerTag).inside {
+                    docker.image(platformConfig.dockerTag).inside('--network=host') {
                         publishPypi([type: platformConfig.publishPypi, server: 'nexus'])
                     }
                 })
@@ -148,7 +148,7 @@ def call(config) {
             })
 
             parallelMap(binariesPlatforms, { platformName, platformConfig ->
-                docker.image(platformConfig.dockerTag).inside {
+                docker.image(platformConfig.dockerTag).inside('--network=host') {
                         publishPypi([type: platformConfig.publishPypi, server: 'pypitest'])
                         publishPypi([type: platformConfig.publishPypi, server: 'pypimain'])
                 }
