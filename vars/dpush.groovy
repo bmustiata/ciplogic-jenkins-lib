@@ -6,7 +6,7 @@ def call(config) {
         ]
     }
 
-    if (config.pushDockerSami) {
+    if (config.publishLocal) {
         sh """
             docker tag ${config.dockerTag} ge-registry:80/${config.dockerTag}
             docker push ge-registry:80/${config.dockerTag}
