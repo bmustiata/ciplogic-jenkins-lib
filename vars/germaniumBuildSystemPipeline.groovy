@@ -39,8 +39,15 @@ def call(config) {
         }
     }
 
+    /**
+     * Runs the `code` function for item in the imageMap, with
+     * the key as a folder, and the value as a list of tags to
+     * be published.
+     */
     def runParallelTasks = { imageMap, code, useCache ->
         def parallelJobs = [:]
+
+        echo "image map: ${imageMap}"
 
         imageMap.entrySet().each({e ->
             def folder = e.key
@@ -51,7 +58,7 @@ def call(config) {
             }
 
             parallelJobs[folder] = {
-                code(images, folder, useCache)
+                code.call(images, folder, useCache)
             }
         })
 
