@@ -17,7 +17,7 @@ def call(config) {
                               .collect({tag -> "-t ${tag}"})
                               .join(" ")
 
-            def buildArgs = folderName
+            def buildArgs = "--network=host ${folderName}"
 
             if (!useCache) {
                 buildArgs = "--no-cache ${buildArgs}"

@@ -11,7 +11,7 @@ def createDockerImage(config, dockerfileContent) {
     try {
         dockerFile.write dockerfileContent.stripIndent()
 
-        return docker.build(config.dockerTag, "-f ${dockerFileName} .")
+        return docker.build(config.dockerTag, "--network=host -f ${dockerFileName} .")
     } finally {
         dockerFile.delete()
     }
